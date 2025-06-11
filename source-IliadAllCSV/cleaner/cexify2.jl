@@ -37,6 +37,6 @@ for bk in 1:24
 end
 
 
-open("formatted.cex", "w") do io
+open("scansion.cex", "w") do io
     write(io, join(formatted,"\n"))
 end
