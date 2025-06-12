@@ -1,0 +1,535 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+        body { font-family: sans-serif; margin: 20px; }
+        label { display: inline-block; margin-right: 10px; }
+        input[type="text"] { width: 200px; padding: 5px; margin-bottom: 10px; }
+        button { padding: 8px 15px; margin-left: 10px; cursor: pointer; }
+        #controls, #display-options { margin-bottom: 20px; }
+        #output { margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px; }
+        .line-display { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #eee; }
+        .line-display h3 { margin-top: 0; font-size: 1.1em; }
+        .error { color: red; font-weight: bold; }
+        .status { color: blue; }
+        pre { background-color: #f4f4f4; padding: 10px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; }
+    
+
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iliad Scansion Visualizer</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        label { display: inline-block; margin-right: 10px; }
+        input[type="text"] { width: 200px; padding: 5px; margin-bottom: 10px; }
+        button { padding: 8px 15px; margin-left: 10px; cursor: pointer; }
+        #controls, #display-options { margin-bottom: 20px; }
+        #output { margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px; }
+        .line-display { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #eee; }
+        .line-display h3 { margin-top: 0; font-size: 1.1em; }
+        .error { color: red; font-weight: bold; }
+        .status { color: blue; }
+        pre { background-color: #f4f4f4; padding: 10px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+</head>
+<body>
+    <h1>Iliad Scansion Visualizer</h1>
+
+    <div id="controls">
+        <label for="passage-input">Passage (e.g., 1.1 or 1.1-1.5):</label>
+        <input type="text" id="passage-input" value="1.1">
+        <button id="visualize-button">Visualize</button>
+    </div>
+
+    <div id="display-options">
+        Display formats:
+        <input type="checkbox" id="words-checkbox" name="displayFormat" value="words" checked>
+        <label for="words-checkbox">Words</label>
+
+        <input type="checkbox" id="syllables-checkbox" name="displayFormat" value="syllables" disabled>
+        <label for="syllables-checkbox">Syllables (TODO)</label>
+
+        <input type="checkbox" id="feet-checkbox" name="displayFormat" value="feet" disabled>
+        <label for="feet-checkbox">Feet (TODO)</label>
+    </div>
+
+    <div id="status">Loading data... Please wait.</div>
+    <div id="output"></div>
+
+    <script>
+        const DATA_URL = 'https://raw.githubusercontent.com/neelsmith/homericlanguage/refs/heads/main/scansion-expanded.cex';
+        
+        // Store raw data lines as requested
+        let rawDataLines = []; 
+        // For easier processing, we'll also parse into objects
+        let parsedData = []; 
+        const columnNames = ['Passage', 'Syllable', 'SyllableText', 'MetricLength', 'Token', 'Half-line'];
+
+        const passageInput = document.getElementById('passage-input');
+        const visualizeButton = document.getElementById('visualize-button');
+        const wordsCheckbox = document.getElementById('words-checkbox');
+        // const syllablesCheckbox = document.getElementById('syllables-checkbox'); // For later
+        // const feetCheckbox = document.getElementById('feet-checkbox');       // For later
+        const outputDiv = document.getElementById('output');
+        const statusDiv = document.getElementById('status');
+
+        async function fetchDataAndParse() {
+            try {
+                statusDiv.textContent = 'Fetching data...';
+                const response = await fetch(DATA_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const textData = await response.text();
+                statusDiv.textContent = 'Parsing data...';
+
+                const lines = textData.trim().split('\n');
+                // Skip header for rawDataLines, but store it if needed elsewhere
+                // const headerLine = lines[0]; 
+                rawDataLines = lines.slice(1).filter(line => line.trim() !== ''); // Store raw strings, filter empty
+
+                parsedData = rawDataLines.map(line => {
+                    const values = line.split('|');
+                    const record = {};
+                    columnNames.forEach((colName, index) => {
+                        if (colName === 'Half-line') {
+                            record[colName] = parseInt(values[index], 10);
+                        } else {
+                            record[colName] = values[index];
+                        }
+                    });
+                    return record;
+                });
+
+                statusDiv.textContent = `Data loaded successfully. ${parsedData.length} records processed.`;
+                visualizeButton.disabled = false;
+                passageInput.disabled = false;
+
+            } catch (error) {
+                console.error('Error fetching or parsing data:', error);
+                statusDiv.innerHTML = `<span class="error">Error loading data: ${error.message}. Please check the console and try refreshing.</span>`;
+                visualizeButton.disabled = true;
+                passageInput.disabled = true;
+            }
+        }
+
+        function getBookLinePart(passageUrn) {
+            if (!passageUrn) return '';
+            const parts = passageUrn.split(':');
+            return parts.length > 0 ? parts[parts.length - 1] : '';
+        }
+
+        function findMatchingRecords(query) {
+            if (!query || query.trim() === '') {
+                statusDiv.innerHTML = `<span class="error">Please enter a passage reference.</span>`;
+                return [];
+            }
+
+            const isRange = query.includes('-');
+            let startRef, endRef;
+
+            if (isRange) {
+                [startRef, endRef] = query.split('-').map(s => s.trim());
+                if (!startRef || !endRef) {
+                    statusDiv.innerHTML = `<span class="error">Invalid range format. Use BOOK.LINE-BOOK.LINE.</span>`;
+                    return [];
+                }
+            } else {
+                startRef = query.trim();
+                endRef = startRef; // For single line, start and end are the same
+            }
+            
+            // Validate format BOOK.LINE (simple check)
+            const refRegex = /^\d+\.\d+$/;
+            if (!refRegex.test(startRef) || !refRegex.test(endRef)) {
+                 statusDiv.innerHTML = `<span class="error">Invalid passage reference format. Use BOOK.LINE (e.g., 1.1).</span>`;
+                 return [];
+            }
+
+            const matchedRecords = [];
+            let startIndex = -1;
+            let endIndex = -1;
+
+            for (let i = 0; i < parsedData.length; i++) {
+                const recordPassagePart = getBookLinePart(parsedData[i].Passage);
+                if (recordPassagePart === startRef && startIndex === -1) {
+                    startIndex = i;
+                }
+                if (recordPassagePart === endRef) {
+                    endIndex = i; // Keep updating endIndex to get the last record of the endRef line
+                }
+            }
+            
+            if (startIndex === -1) {
+                statusDiv.innerHTML = `<span class="error">Start passage ${startRef} not found in data.</span>`;
+                return [];
+            }
+            if (isRange && endIndex < startIndex) { // Should also cover endIndex === -1 for range
+                statusDiv.innerHTML = `<span class="error">End passage ${endRef} not found or occurs before start passage.</span>`;
+                return [];
+            }
+             if (!isRange && endIndex === -1) { // Specifically for single line not found (though covered by startIndex)
+                statusDiv.innerHTML = `<span class="error">Passage ${startRef} not found in data.</span>`;
+                return [];
+            }
+
+
+            // Find the true end index for the endRef line
+            // The previous loop only sets endIndex to *a* record matching endRef.
+            // We need all records for that line.
+            let trueEndIndex = endIndex;
+            if (endIndex !== -1) {
+                for (let i = endIndex + 1; i < parsedData.length; i++) {
+                    if (getBookLinePart(parsedData[i].Passage) === endRef) {
+                        trueEndIndex = i;
+                    } else {
+                        break; // Moved to the next line
+                    }
+                }
+            }
+
+
+            if (startIndex !== -1 && trueEndIndex !== -1 && trueEndIndex >= startIndex) {
+                for (let i = startIndex; i <= trueEndIndex; i++) {
+                    matchedRecords.push(parsedData[i]);
+                }
+                return matchedRecords;
+            } else {
+                 statusDiv.innerHTML = `<span class="error">Could not find the specified passage range. Start: ${startRef}, End: ${endRef}</span>`;
+                return [];
+            }
+        }
+
+        function formatWords(lineRecords) {
+            if (!lineRecords || lineRecords.length === 0) return "";
+            
+            let wordsString = "";
+            let previousToken = null;
+
+            lineRecords.forEach((record, index) => {
+                if (index > 0 && record.Token !== previousToken) {
+                    wordsString += " ";
+                }
+                wordsString += record.SyllableText;
+                previousToken = record.Token;
+            });
+            return wordsString;
+        }
+
+        function displayResults() {
+            outputDiv.innerHTML = ''; // Clear previous results
+            statusDiv.textContent = ''; // Clear previous status/errors
+
+            const query = passageInput.value;
+            const records = findMatchingRecords(query);
+
+            if (records.length === 0 && statusDiv.textContent === '') { // if findMatchingRecords didn't set an error
+                statusDiv.textContent = 'No records found for the given passage.';
+                return;
+            }
+            if (records.length === 0) return; // Error already set by findMatchingRecords
+
+
+            // Group records by Passage (i.e., by Iliad line)
+            const linesToDisplay = {};
+            records.forEach(record => {
+                if (!linesToDisplay[record.Passage]) {
+                    linesToDisplay[record.Passage] = [];
+                }
+                linesToDisplay[record.Passage].push(record);
+            });
+
+            let htmlContent = '';
+            for (const passageUrn in linesToDisplay) {
+                const lineRecords = linesToDisplay[passageUrn];
+                const passageRefDisplay = getBookLinePart(passageUrn);
+
+                htmlContent += `<div class="line-display">`;
+                htmlContent += `<h3>Line ${passageRefDisplay} (URN: ${passageUrn})</h3>`;
+
+                if (wordsCheckbox.checked) {
+                    const wordsOutput = formatWords(lineRecords);
+                    htmlContent += `<h4>Words:</h4><pre>${wordsOutput}</pre>`;
+                }
+
+                // Placeholder for future displays
+                // if (syllablesCheckbox.checked) { ... }
+                // if (feetCheckbox.checked) { ... }
+
+                htmlContent += `</div>`;
+            }
+            outputDiv.innerHTML = htmlContent;
+             if (htmlContent === '') {
+                statusDiv.textContent = 'No display options selected or no data to display for the selection.';
+            } else {
+                 statusDiv.textContent = `Displaying ${Object.keys(linesToDisplay).length} line(s).`;
+            }
+        }
+
+        // --- Event Listeners ---
+        visualizeButton.addEventListener('click', displayResults);
+        passageInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                displayResults();
+            }
+        });
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            visualizeButton.disabled = true;
+            passageInput.disabled = true;
+            fetchDataAndParse();
+        });
+
+    </script>
+</body>
+</html>
+
+
+
+							<script>
+                            	
+        const DATA_URL = 'https://raw.githubusercontent.com/neelsmith/homericlanguage/refs/heads/main/scansion-expanded.cex';
+        
+        // Store raw data lines as requested
+        let rawDataLines = []; 
+        // For easier processing, we'll also parse into objects
+        let parsedData = []; 
+        const columnNames = ['Passage', 'Syllable', 'SyllableText', 'MetricLength', 'Token', 'Half-line'];
+
+        const passageInput = document.getElementById('passage-input');
+        const visualizeButton = document.getElementById('visualize-button');
+        const wordsCheckbox = document.getElementById('words-checkbox');
+        // const syllablesCheckbox = document.getElementById('syllables-checkbox'); // For later
+        // const feetCheckbox = document.getElementById('feet-checkbox');       // For later
+        const outputDiv = document.getElementById('output');
+        const statusDiv = document.getElementById('status');
+
+        async function fetchDataAndParse() {
+            try {
+                statusDiv.textContent = 'Fetching data...';
+                const response = await fetch(DATA_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const textData = await response.text();
+                statusDiv.textContent = 'Parsing data...';
+
+                const lines = textData.trim().split('\n');
+                // Skip header for rawDataLines, but store it if needed elsewhere
+                // const headerLine = lines[0]; 
+                rawDataLines = lines.slice(1).filter(line => line.trim() !== ''); // Store raw strings, filter empty
+
+                parsedData = rawDataLines.map(line => {
+                    const values = line.split('|');
+                    const record = {};
+                    columnNames.forEach((colName, index) => {
+                        if (colName === 'Half-line') {
+                            record[colName] = parseInt(values[index], 10);
+                        } else {
+                            record[colName] = values[index];
+                        }
+                    });
+                    return record;
+                });
+
+                statusDiv.textContent = `Data loaded successfully. ${parsedData.length} records processed.`;
+                visualizeButton.disabled = false;
+                passageInput.disabled = false;
+
+            } catch (error) {
+                console.error('Error fetching or parsing data:', error);
+                statusDiv.innerHTML = `<span class="error">Error loading data: ${error.message}. Please check the console and try refreshing.</span>`;
+                visualizeButton.disabled = true;
+                passageInput.disabled = true;
+            }
+        }
+
+        function getBookLinePart(passageUrn) {
+            if (!passageUrn) return '';
+            const parts = passageUrn.split(':');
+            return parts.length > 0 ? parts[parts.length - 1] : '';
+        }
+
+        function findMatchingRecords(query) {
+            if (!query || query.trim() === '') {
+                statusDiv.innerHTML = `<span class="error">Please enter a passage reference.</span>`;
+                return [];
+            }
+
+            const isRange = query.includes('-');
+            let startRef, endRef;
+
+            if (isRange) {
+                [startRef, endRef] = query.split('-').map(s => s.trim());
+                if (!startRef || !endRef) {
+                    statusDiv.innerHTML = `<span class="error">Invalid range format. Use BOOK.LINE-BOOK.LINE.</span>`;
+                    return [];
+                }
+            } else {
+                startRef = query.trim();
+                endRef = startRef; // For single line, start and end are the same
+            }
+            
+            // Validate format BOOK.LINE (simple check)
+            const refRegex = /^\d+\.\d+$/;
+            if (!refRegex.test(startRef) || !refRegex.test(endRef)) {
+                 statusDiv.innerHTML = `<span class="error">Invalid passage reference format. Use BOOK.LINE (e.g., 1.1).</span>`;
+                 return [];
+            }
+
+            const matchedRecords = [];
+            let startIndex = -1;
+            let endIndex = -1;
+
+            for (let i = 0; i < parsedData.length; i++) {
+                const recordPassagePart = getBookLinePart(parsedData[i].Passage);
+                if (recordPassagePart === startRef && startIndex === -1) {
+                    startIndex = i;
+                }
+                if (recordPassagePart === endRef) {
+                    endIndex = i; // Keep updating endIndex to get the last record of the endRef line
+                }
+            }
+            
+            if (startIndex === -1) {
+                statusDiv.innerHTML = `<span class="error">Start passage ${startRef} not found in data.</span>`;
+                return [];
+            }
+            if (isRange && endIndex < startIndex) { // Should also cover endIndex === -1 for range
+                statusDiv.innerHTML = `<span class="error">End passage ${endRef} not found or occurs before start passage.</span>`;
+                return [];
+            }
+             if (!isRange && endIndex === -1) { // Specifically for single line not found (though covered by startIndex)
+                statusDiv.innerHTML = `<span class="error">Passage ${startRef} not found in data.</span>`;
+                return [];
+            }
+
+
+            // Find the true end index for the endRef line
+            // The previous loop only sets endIndex to *a* record matching endRef.
+            // We need all records for that line.
+            let trueEndIndex = endIndex;
+            if (endIndex !== -1) {
+                for (let i = endIndex + 1; i < parsedData.length; i++) {
+                    if (getBookLinePart(parsedData[i].Passage) === endRef) {
+                        trueEndIndex = i;
+                    } else {
+                        break; // Moved to the next line
+                    }
+                }
+            }
+
+
+            if (startIndex !== -1 && trueEndIndex !== -1 && trueEndIndex >= startIndex) {
+                for (let i = startIndex; i <= trueEndIndex; i++) {
+                    matchedRecords.push(parsedData[i]);
+                }
+                return matchedRecords;
+            } else {
+                 statusDiv.innerHTML = `<span class="error">Could not find the specified passage range. Start: ${startRef}, End: ${endRef}</span>`;
+                return [];
+            }
+        }
+
+        function formatWords(lineRecords) {
+            if (!lineRecords || lineRecords.length === 0) return "";
+            
+            let wordsString = "";
+            let previousToken = null;
+
+            lineRecords.forEach((record, index) => {
+                if (index > 0 && record.Token !== previousToken) {
+                    wordsString += " ";
+                }
+                wordsString += record.SyllableText;
+                previousToken = record.Token;
+            });
+            return wordsString;
+        }
+
+        function displayResults() {
+            outputDiv.innerHTML = ''; // Clear previous results
+            statusDiv.textContent = ''; // Clear previous status/errors
+
+            const query = passageInput.value;
+            const records = findMatchingRecords(query);
+
+            if (records.length === 0 && statusDiv.textContent === '') { // if findMatchingRecords didn't set an error
+                statusDiv.textContent = 'No records found for the given passage.';
+                return;
+            }
+            if (records.length === 0) return; // Error already set by findMatchingRecords
+
+
+            // Group records by Passage (i.e., by Iliad line)
+            const linesToDisplay = {};
+            records.forEach(record => {
+                if (!linesToDisplay[record.Passage]) {
+                    linesToDisplay[record.Passage] = [];
+                }
+                linesToDisplay[record.Passage].push(record);
+            });
+
+            let htmlContent = '';
+            for (const passageUrn in linesToDisplay) {
+                const lineRecords = linesToDisplay[passageUrn];
+                const passageRefDisplay = getBookLinePart(passageUrn);
+
+                htmlContent += `<div class="line-display">`;
+                htmlContent += `<h3>Line ${passageRefDisplay} (URN: ${passageUrn})</h3>`;
+
+                if (wordsCheckbox.checked) {
+                    const wordsOutput = formatWords(lineRecords);
+                    htmlContent += `<h4>Words:</h4><pre>${wordsOutput}</pre>`;
+                }
+
+                // Placeholder for future displays
+                // if (syllablesCheckbox.checked) { ... }
+                // if (feetCheckbox.checked) { ... }
+
+                htmlContent += `</div>`;
+            }
+            outputDiv.innerHTML = htmlContent;
+             if (htmlContent === '') {
+                statusDiv.textContent = 'No display options selected or no data to display for the selection.';
+            } else {
+                 statusDiv.textContent = `Displaying ${Object.keys(linesToDisplay).length} line(s).`;
+            }
+        }
+
+        // --- Event Listeners ---
+        visualizeButton.addEventListener('click', displayResults);
+        passageInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                displayResults();
+            }
+        });
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            visualizeButton.disabled = true;
+            passageInput.disabled = true;
+            fetchDataAndParse();
+        });
+
+    
+
+							</script>
+                        </body>
+                        </html>
+                    

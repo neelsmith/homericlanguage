@@ -7,7 +7,7 @@ currtoken = 0
 syllnum = 0
 
 
-delimitedoutput = ["Passage|Syllable|SyllableText|MetricLength|TokenIndex|Half-line"]
+delimitedoutput = ["Passage|Syllable|SyllableText|MetricLength|Token|Half-line"]
 for ln in data
     syllurn = ""
     cols = split(ln, "|")
