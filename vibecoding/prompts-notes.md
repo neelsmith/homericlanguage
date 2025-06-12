@@ -20,7 +20,11 @@ Each display will display a single *Iliad* line: that is, all records with the s
 
 Please implement this in an HTML page.
 
+---
 
-Each
+Great. For *syllables*, please compose the output as follows. Start with the `SyllableText` column of the first record. As you advance through the successive records, if the current record has the same `Token` value (ie, is part of the same word), join it to the output with a hyphen `-`; if it has a different `Token` value it is a new word: joint it to the output with a space. 
+---
 
-compose a function named `display` that we can reuse in this or other webapps. It should take four parameters: an array of data strings, and 3 boolean values . The function should create a 
+Excellent. Now let's tweak the syllables display. Let's highlight each syllable with one of three background colors depending on the value of the `MetricLength` of that syllable. If `MetricLength` is `long`, use a gray background; if is it `short`, use a visually distinguishable lighter gray background. If it is `anceps` use an orangeish "caution" color.
+---
+Beautiful! Now let's make each syllable in the syllables display clickable. When the user clicks on a syllable, display the foot-syllable reference. This is encoded in the final two period-separated pieces of the `Syllable` column's passage value. **Example**: if the value of the `Syllable` column is `urn:cts:greekLit:tlg0012.tlg001.hmtx:6.3.1.2`, then the passage value is the last colon-delimited component `6.3.1.2`; the last two period-separated pieces of that are `1.2` so we would display `1.2` to indicate foot `1`, syllable `2`.
