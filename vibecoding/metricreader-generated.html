@@ -438,7 +438,7 @@
                 const tokenUrn = wordSpan.dataset.tokenUrn;
                 if (tokenUrn) {
                     const passageComponent = getPassageComponentFromUrn(tokenUrn);
-                    infoDisplay.textContent = `Word token: ${passageComponent}`;
+                    infoDisplay.textContent = `Clicked Word Token: ${passageComponent} (Full URN: ${tokenUrn})`;
                 } else { infoDisplay.textContent = 'Clicked word has no URN data.'; }
             } else if (syllableSpan) {
                 const syllableUrn = syllableSpan.dataset.syllableUrn;
@@ -446,13 +446,13 @@
                     const passageId = getPassageComponentFromUrn(syllableUrn);
                     const nodeComponents = passageId.split('.');
                     if (nodeComponents.length >= 4) { 
-                        infoDisplay.textContent = `${syllableSpan.textContent}, foot-syllable: ${nodeComponents[2]}.${nodeComponents[3]}  Length: ${syllableSpan.classList.contains('syllable-long') ? 'Long' : syllableSpan.classList.contains('syllable-short') ? 'Short' : 'Anceps'} `;
+                        infoDisplay.textContent = `Syllable: ${syllableSpan.textContent} | Foot-Syllable Ref: ${nodeComponents[2]}.${nodeComponents[3]} | Metric: ${syllableSpan.classList.contains('syllable-long') ? 'Long' : syllableSpan.classList.contains('syllable-short') ? 'Short' : 'Anceps'} (URN: ${syllableUrn})`;
                     } else { infoDisplay.textContent = `Malformed syllable URN for details: ${syllableUrn}`; }
                 } else { infoDisplay.textContent = 'Clicked syllable has no URN data for details.'; }
             } else if (footSpan) {
                 const footId = footSpan.dataset.footId;
                 const footType = footSpan.dataset.footType;
-                infoDisplay.textContent = `Foot ${footId}, ${footType.charAt(0).toUpperCase() + footType.slice(1)}`;
+                infoDisplay.textContent = `Clicked Foot: ${footId} | Type: ${footType.charAt(0).toUpperCase() + footType.slice(1)}`;
             }
         });
 
