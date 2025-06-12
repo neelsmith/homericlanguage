@@ -53,3 +53,26 @@ Please implement this and show the resulting HTML.
 All the functionality is perfect! Now let's tweak the layout a little without in any way changing the functionality of the app. I'd like to start by placing the area for displaying details when the user clicks in a column to the right of the displayed lines. 
 ---
 This is good, but two messages are lingering when it seems they should be hidden. In the right hand column, there is a separate blue box with the text "Details will appear here when an item is clicked." even after I click on an item and the details are correctly displayed. In the left hand column, the message "Loading data... Please wait" remains even after the data have been loaded. Could you check that?
+
+---
+
+Fixed! Great! Now some adjustments to arrangement and spacing. Please change the text "Display formats:"  labelling the 3 checkboxes to just "Display:", and move the label and check box to follow the button "Visualize" immediately, without any vertical break.
+
+---
+The user input box and three check boxes are displayed twice. Please fix that.
+---
+
+Thanks! There's one minor behavioral quirk. The app defaults to checking the box for "Words" and unchecking the others, but doesn't actually display anything until the user has changed one of the checkboxes (ie, the app seems to think that in their initial or default state all 3 boxes are unchecked even though "Words" is checked) Could you fix that?
+---
+Closer. App now correctly shows initial state and correctly responds to changes of checkboxes but does not react to change of the user-supplied passage reference. Please fix.
+
+---
+
+Perfect! Now I'd like to make the display of words interactive. Each word should be clickable.  When clicked, the app should display the passage component of the `Token` URN string. **Example**: if the user clicks on a word made up of syllables with the `Token` value `urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.3`, the app should display `1.1.3`.
+
+---
+
+
+u2225 "Parallel to"
+
+

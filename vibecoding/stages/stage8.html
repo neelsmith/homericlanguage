@@ -1,0 +1,841 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+        body { font-family: sans-serif; margin: 20px; }
+        label { display: inline-block; margin-right: 10px; }
+        input[type="text"] { width: 200px; padding: 5px; margin-bottom: 10px; }
+        button { padding: 8px 15px; margin-left: 10px; cursor: pointer; }
+        #controls, #display-options { margin-bottom: 20px; }
+        
+        #main-visualization-area {
+            display: flex;
+            gap: 20px; 
+            margin-top: 20px;
+        }
+
+        #output { 
+            flex: 3; 
+            border-top: 1px solid #ccc; 
+            padding-top: 10px; 
+            min-width: 0; 
+        }
+
+        #info-display {
+            flex: 1; 
+            padding: 15px; 
+            border: 1px solid #b0c4de; 
+            background-color: #f0f8ff; 
+            font-size: 0.9em;
+            color: #333;
+            border-radius: 4px;
+            min-height: 100px; 
+        }
+
+        .line-display { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #eee; }
+        .line-display h3 { margin-top: 0; font-size: 1.1em; }
+        .line-display h4 { margin-top: 10px; margin-bottom: 5px; font-size: 1em; }
+        .error { color: red; font-weight: bold; }
+        .status { color: blue; margin-bottom: 10px; min-height: 1.2em; /* Give status some space */}
+        pre { 
+            background-color: #f9f9f9; padding: 10px; border-radius: 4px; 
+            white-space: pre-wrap; word-wrap: break-word; line-height: 1.8; 
+        }
+
+        /* Styles for syllable highlighting */
+        .syllable-display-span { 
+            display: inline-block; padding: 2px 4px; margin: 1px 0;         
+            border-radius: 3px; line-height: 1.4; vertical-align: middle;
+        }
+        .syllable-long { background-color: #cccccc; color: #000; }
+        .syllable-short { background-color: #eeeeee; color: #333; }
+        .syllable-anceps { background-color: #ffcc80; color: #573a08; }
+        .syllable-unknown { background-color: #f0f0f0; border: 1px dashed #ccc; }
+        .clickable-syllable { cursor: pointer; }
+        .clickable-syllable:hover { outline: 1px solid #007bff; box-shadow: 0 0 3px rgba(0,123,255,0.5); }
+        .syllable-visualization-container pre { background-color: #fff; border: 1px solid #e0e0e0; }
+
+        /* Styles for feet display */
+        .foot-display-span {
+            display: inline-block; padding: 3px 6px; margin: 2px 3px 2px 0; 
+            border-radius: 4px; line-height: 1.4; vertical-align: middle;
+            border: 1px solid rgba(0,0,0,0.1); 
+        }
+        .clickable-foot { cursor: pointer; }
+        .clickable-foot:hover { outline: 2px solid #28a745; box-shadow: 0 0 5px rgba(40,167,69,0.6); }
+        .foot-color-0 { background-color: #e0f2f7; } .foot-color-1 { background-color: #e8f5e9; } 
+        .foot-color-2 { background-color: #fffde7; } .foot-color-3 { background-color: #fce4ec; } 
+        .foot-color-4 { background-color: #f3e5f5; } .foot-color-5 { background-color: #fff3e0; } 
+        .foot-separator { display: inline-block; margin: 0 3px; color: #aaa; font-size: 0.9em; vertical-align: middle; }
+        .feet-visualization-container pre { background-color: #fff; border: 1px solid #e0e0e0; }
+
+    
+
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iliad Scansion Visualizer</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        label { display: inline-block; margin-right: 10px; }
+        input[type="text"] { width: 200px; padding: 5px; margin-bottom: 10px; }
+        button { padding: 8px 15px; margin-left: 10px; cursor: pointer; }
+        #controls, #display-options { margin-bottom: 20px; }
+        
+        #main-visualization-area {
+            display: flex;
+            gap: 20px; 
+            margin-top: 20px;
+        }
+
+        #output { 
+            flex: 3; 
+            border-top: 1px solid #ccc; 
+            padding-top: 10px; 
+            min-width: 0; 
+        }
+
+        #info-display {
+            flex: 1; 
+            padding: 15px; 
+            border: 1px solid #b0c4de; 
+            background-color: #f0f8ff; 
+            font-size: 0.9em;
+            color: #333;
+            border-radius: 4px;
+            min-height: 100px; 
+        }
+
+        .line-display { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #eee; }
+        .line-display h3 { margin-top: 0; font-size: 1.1em; }
+        .line-display h4 { margin-top: 10px; margin-bottom: 5px; font-size: 1em; }
+        .error { color: red; font-weight: bold; }
+        .status { color: blue; margin-bottom: 10px; min-height: 1.2em; /* Give status some space */}
+        pre { 
+            background-color: #f9f9f9; padding: 10px; border-radius: 4px; 
+            white-space: pre-wrap; word-wrap: break-word; line-height: 1.8; 
+        }
+
+        /* Styles for syllable highlighting */
+        .syllable-display-span { 
+            display: inline-block; padding: 2px 4px; margin: 1px 0;         
+            border-radius: 3px; line-height: 1.4; vertical-align: middle;
+        }
+        .syllable-long { background-color: #cccccc; color: #000; }
+        .syllable-short { background-color: #eeeeee; color: #333; }
+        .syllable-anceps { background-color: #ffcc80; color: #573a08; }
+        .syllable-unknown { background-color: #f0f0f0; border: 1px dashed #ccc; }
+        .clickable-syllable { cursor: pointer; }
+        .clickable-syllable:hover { outline: 1px solid #007bff; box-shadow: 0 0 3px rgba(0,123,255,0.5); }
+        .syllable-visualization-container pre { background-color: #fff; border: 1px solid #e0e0e0; }
+
+        /* Styles for feet display */
+        .foot-display-span {
+            display: inline-block; padding: 3px 6px; margin: 2px 3px 2px 0; 
+            border-radius: 4px; line-height: 1.4; vertical-align: middle;
+            border: 1px solid rgba(0,0,0,0.1); 
+        }
+        .clickable-foot { cursor: pointer; }
+        .clickable-foot:hover { outline: 2px solid #28a745; box-shadow: 0 0 5px rgba(40,167,69,0.6); }
+        .foot-color-0 { background-color: #e0f2f7; } .foot-color-1 { background-color: #e8f5e9; } 
+        .foot-color-2 { background-color: #fffde7; } .foot-color-3 { background-color: #fce4ec; } 
+        .foot-color-4 { background-color: #f3e5f5; } .foot-color-5 { background-color: #fff3e0; } 
+        .foot-separator { display: inline-block; margin: 0 3px; color: #aaa; font-size: 0.9em; vertical-align: middle; }
+        .feet-visualization-container pre { background-color: #fff; border: 1px solid #e0e0e0; }
+
+    </style>
+</head>
+<body>
+    <h1>Iliad Scansion Visualizer</h1>
+
+    <div id="controls">
+        <label for="passage-input">Passage (e.g., 1.1 or 1.1-1.5):</label>
+        <input type="text" id="passage-input" value="1.1">
+        <button id="visualize-button">Visualize</button>
+    </div>
+
+    <div id="display-options">
+        Display formats:
+        <input type="checkbox" id="words-checkbox" name="displayFormat" value="words" checked>
+        <label for="words-checkbox">Words</label>
+
+        <input type="checkbox" id="syllables-checkbox" name="displayFormat" value="syllables">
+        <label for="syllables-checkbox">Syllables</label>
+
+        <input type="checkbox" id="feet-checkbox" name="displayFormat" value="feet">
+        <label for="feet-checkbox">Feet</label>
+    </div>
+
+    <div id="status" class="status"></div> <!-- Initially empty -->
+
+    <div id="main-visualization-area">
+        <div id="output"></div>
+        <div id="info-display"></div> <!-- Initially empty -->
+    </div>
+
+    <script>
+        const DATA_URL = 'https://raw.githubusercontent.com/neelsmith/homericlanguage/refs/heads/main/scansion-expanded.cex';
+        
+        let rawDataLines = []; 
+        let parsedData = []; 
+        const columnNames = ['Passage', 'Syllable', 'SyllableText', 'MetricLength', 'Token', 'Half-line'];
+
+        const passageInput = document.getElementById('passage-input');
+        const visualizeButton = document.getElementById('visualize-button');
+        const wordsCheckbox = document.getElementById('words-checkbox');
+        const syllablesCheckbox = document.getElementById('syllables-checkbox');
+        const feetCheckbox = document.getElementById('feet-checkbox'); 
+        const outputDiv = document.getElementById('output');
+        const statusDiv = document.getElementById('status');
+        const infoDisplay = document.getElementById('info-display'); 
+
+        const PLACEHOLDER_INFO_TEXT = 'Details will appear here when an item is clicked.';
+
+        async function fetchDataAndParse() {
+            try {
+                statusDiv.textContent = 'Fetching data... Please wait.'; // Explicitly set loading message
+                const response = await fetch(DATA_URL);
+                if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                const textData = await response.text();
+                statusDiv.textContent = 'Parsing data...'; // Update status
+
+                const lines = textData.trim().split('\n');
+                rawDataLines = lines.slice(1).filter(line => line.trim() !== '');
+
+                parsedData = rawDataLines.map(line => {
+                    const values = line.split('|');
+                    const record = {};
+                    columnNames.forEach((colName, index) => {
+                        record[colName] = (colName === 'Half-line') ? parseInt(values[index], 10) : values[index];
+                    });
+                    return record;
+                });
+
+                statusDiv.textContent = `Data loaded successfully. ${parsedData.length} records processed.`; // Success
+                infoDisplay.textContent = PLACEHOLDER_INFO_TEXT; // Set placeholder after data load
+                visualizeButton.disabled = false;
+                passageInput.disabled = false;
+                syllablesCheckbox.disabled = false; 
+                feetCheckbox.disabled = false; 
+
+            } catch (error) {
+                console.error('Error fetching or parsing data:', error);
+                statusDiv.innerHTML = `<span class="error">Error loading data: ${error.message}. Please check console.</span>`; // Error
+                infoDisplay.textContent = 'Could not load data to display details.'; // Info display reflects error too
+                visualizeButton.disabled = true;
+                passageInput.disabled = true;
+                syllablesCheckbox.disabled = true;
+                feetCheckbox.disabled = true;
+            }
+        }
+
+        function getBookLinePart(passageUrn) {
+            // ... (no changes)
+            if (!passageUrn) return '';
+            const parts = passageUrn.split(':');
+            return parts.length > 0 ? parts[parts.length - 1] : '';
+        }
+
+        function getFootIdFromSyllableUrn(syllableUrn) {
+            // ... (no changes)
+            if (!syllableUrn) return null;
+            const urnParts = syllableUrn.split(':');
+            if (urnParts.length < 2) return null; 
+            const passageIdentifier = urnParts[urnParts.length - 1]; 
+            const nodeComponents = passageIdentifier.split('.'); 
+            if (nodeComponents.length >= 3) { 
+                return nodeComponents[2]; 
+            }
+            return null; 
+        }
+
+        function findMatchingRecords(query) {
+            // ... (no changes to core logic, but status updates are important)
+            if (!query || query.trim() === '') {
+                statusDiv.innerHTML = `<span class="error">Please enter a passage reference.</span>`; return [];
+            }
+            const isRange = query.includes('-');
+            let startRef, endRef;
+            if (isRange) {
+                [startRef, endRef] = query.split('-').map(s => s.trim());
+                if (!startRef || !endRef) {
+                    statusDiv.innerHTML = `<span class="error">Invalid range format. Use BOOK.LINE-BOOK.LINE.</span>`; return [];
+                }
+            } else {
+                startRef = query.trim(); endRef = startRef;
+            }
+            const refRegex = /^\d+\.\d+$/;
+            if (!refRegex.test(startRef) || !refRegex.test(endRef)) {
+                 statusDiv.innerHTML = `<span class="error">Invalid passage reference format. Use BOOK.LINE (e.g., 1.1).</span>`; return [];
+            }
+            const matchedRecords = [];
+            let startIndex = -1, endIndex = -1;
+            for (let i = 0; i < parsedData.length; i++) {
+                const recordPassagePart = getBookLinePart(parsedData[i].Passage);
+                if (recordPassagePart === startRef && startIndex === -1) startIndex = i;
+                if (recordPassagePart === endRef) endIndex = i; 
+            }
+            if (startIndex === -1) { statusDiv.innerHTML = `<span class="error">Start passage ${startRef} not found.</span>`; return []; }
+            if (isRange && endIndex < startIndex) { statusDiv.innerHTML = `<span class="error">End passage ${endRef} not found or before start.</span>`; return []; }
+            if (!isRange && endIndex === -1) { statusDiv.innerHTML = `<span class="error">Passage ${startRef} not found.</span>`; return []; }
+            let trueEndIndex = endIndex;
+            if (endIndex !== -1) {
+                for (let i = endIndex + 1; i < parsedData.length; i++) {
+                    if (getBookLinePart(parsedData[i].Passage) === endRef) trueEndIndex = i;
+                    else break; 
+                }
+            }
+            if (startIndex !== -1 && trueEndIndex !== -1 && trueEndIndex >= startIndex) {
+                for (let i = startIndex; i <= trueEndIndex; i++) matchedRecords.push(parsedData[i]);
+                return matchedRecords;
+            } else {
+                 statusDiv.innerHTML = `<span class="error">Could not find passage range ${startRef}-${endRef}.</span>`; return [];
+            }
+        }
+
+        function formatWords(lineRecords) { /* ... (no changes) ... */ 
+            if (!lineRecords || lineRecords.length === 0) return "";
+            let wordsString = ""; let previousToken = null;
+            lineRecords.forEach((record, index) => {
+                if (index > 0 && record.Token !== previousToken) wordsString += " ";
+                wordsString += record.SyllableText;
+                previousToken = record.Token;
+            });
+            return wordsString;
+        }
+        function formatSyllables(lineRecords) { /* ... (no changes) ... */
+            if (!lineRecords || lineRecords.length === 0) return "";
+            let syllablesHtmlOutput = ""; let previousToken = null;
+            lineRecords.forEach((record, index) => {
+                let syllableClass = 'syllable-unknown'; 
+                switch (record.MetricLength.toLowerCase()) { 
+                    case 'long': syllableClass = 'syllable-long'; break;
+                    case 'short': syllableClass = 'syllable-short'; break;
+                    case 'anceps': syllableClass = 'syllable-anceps'; break;
+                }
+                const safeSyllableText = record.SyllableText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const syllableSpan = `<span class="syllable-display-span clickable-syllable ${syllableClass}" data-syllable-urn="${record.Syllable}">${safeSyllableText}</span>`;
+                if (index === 0) { syllablesHtmlOutput += syllableSpan; } 
+                else {
+                    syllablesHtmlOutput += (record.Token !== previousToken) ? " " : "-";
+                    syllablesHtmlOutput += syllableSpan;
+                }
+                previousToken = record.Token;
+            });
+            return syllablesHtmlOutput; 
+        }
+        function formatFeet(lineRecords) { /* ... (no changes) ... */
+            if (!lineRecords || lineRecords.length === 0) return "";
+            const feetMap = {};
+            lineRecords.forEach(record => {
+                const footId = getFootIdFromSyllableUrn(record.Syllable);
+                if (footId === null) { console.warn("Could not determine foot ID for syllable:", record.Syllable); return; }
+                if (!feetMap[footId]) feetMap[footId] = [];
+                feetMap[footId].push(record);
+            });
+            let feetHtmlOutput = "";
+            const sortedFootIds = Object.keys(feetMap).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+            sortedFootIds.forEach((footId, footIndex) => {
+                const syllablesInFoot = feetMap[footId];
+                if (!syllablesInFoot || syllablesInFoot.length === 0) return;
+                let footText = ""; let previousTokenForFoot = null;
+                syllablesInFoot.forEach((syllableRecord, idx) => {
+                    const safeSyllableText = syllableRecord.SyllableText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    if (idx === 0) footText += safeSyllableText;
+                    else {
+                        footText += (syllableRecord.Token !== previousTokenForFoot) ? " " : "-";
+                        footText += safeSyllableText;
+                    }
+                    previousTokenForFoot = syllableRecord.Token;
+                });
+                const numSyllables = syllablesInFoot.length;
+                let footType = "irregular";
+                if (numSyllables === 2) footType = "spondee"; else if (numSyllables === 3) footType = "dactyl";
+                const colorClass = `foot-color-${(parseInt(footId, 10) - 1) % 6}`;
+                if (footIndex > 0) feetHtmlOutput += `<span class="foot-separator">|</span>`;
+                feetHtmlOutput += `<span class="foot-display-span clickable-foot ${colorClass}" data-foot-id="${footId}" data-foot-type="${footType}">${footText}</span>`;
+            });
+            return feetHtmlOutput;
+        }
+
+        function displayResults() {
+            outputDiv.innerHTML = ''; 
+            // Don't clear statusDiv here, let findMatchingRecords or this function set it appropriately.
+            // If query is valid and yields results, statusDiv will be updated below.
+            // If query is invalid, findMatchingRecords will set the status.
+            
+            // Reset infoDisplay to placeholder *only if* we are about to show results or specific messages.
+            infoDisplay.textContent = PLACEHOLDER_INFO_TEXT; 
+
+            const query = passageInput.value;
+            const records = findMatchingRecords(query); // This might set statusDiv if query is bad
+
+            if (records.length === 0) {
+                if (statusDiv.textContent === '') { // If findMatchingRecords didn't set a specific error for the query
+                    statusDiv.textContent = 'No records found for the given passage.';
+                }
+                // infoDisplay remains PLACEHOLDER_INFO_TEXT or could be set to "No details for empty results."
+                return; 
+            }
+            // If records found, findMatchingRecords did not set an error in statusDiv.
+            // Clear any previous generic status message from data loading if it's still there.
+            statusDiv.textContent = ''; // Clear previous status messages like "Data loaded" if we are showing results.
+
+            const linesToDisplay = {};
+            records.forEach(record => {
+                if (!linesToDisplay[record.Passage]) linesToDisplay[record.Passage] = [];
+                linesToDisplay[record.Passage].push(record);
+            });
+
+            let htmlContent = ''; let displayedSomething = false; 
+
+            for (const passageUrn in linesToDisplay) {
+                const lineRecords = linesToDisplay[passageUrn];
+                const passageRefDisplay = getBookLinePart(passageUrn);
+                let lineHtml = `<div class="line-display"><h3>Line ${passageRefDisplay} (URN: ${passageUrn})</h3>`;
+                let lineHasContent = false;
+
+                if (wordsCheckbox.checked) {
+                    lineHtml += `<h4>Words:</h4><pre>${formatWords(lineRecords)}</pre>`;
+                    lineHasContent = true; displayedSomething = true;
+                }
+                if (syllablesCheckbox.checked) {
+                    lineHtml += `<h4>Syllables:</h4><div class="syllable-visualization-container"><pre>${formatSyllables(lineRecords)}</pre></div>`;
+                    lineHasContent = true; displayedSomething = true;
+                }
+                if (feetCheckbox.checked) {
+                    lineHtml += `<h4>Feet:</h4><div class="feet-visualization-container"><pre>${formatFeet(lineRecords)}</pre></div>`;
+                    lineHasContent = true; displayedSomething = true;
+                }
+                lineHtml += `</div>`;
+                if (lineHasContent) htmlContent += lineHtml;
+            }
+            outputDiv.innerHTML = htmlContent;
+
+            if (!displayedSomething && records.length > 0) { 
+                statusDiv.textContent = 'Please select a display format.'; 
+            } else if (records.length > 0) { 
+                statusDiv.textContent = `Displaying ${Object.keys(linesToDisplay).length} line(s).`; 
+            }
+        }
+
+        // --- Event Listeners ---
+        visualizeButton.addEventListener('click', displayResults);
+        passageInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') displayResults(); });
+        
+        function handleCheckboxChange() {
+            // If there's a query or existing output, re-evaluate
+            if (passageInput.value.trim() !== '' || outputDiv.innerHTML.trim() !== '') {
+                 // Check if any output is still relevant
+                const recordsForCurrentQuery = findMatchingRecords(passageInput.value);
+
+                if (wordsCheckbox.checked || syllablesCheckbox.checked || feetCheckbox.checked) {
+                    // If some display format is selected, and query is valid, display results
+                    if (recordsForCurrentQuery.length > 0 || passageInput.value.trim() === '') { 
+                        // also call displayResults if input is empty to clear things
+                        displayResults();
+                    } else if (statusDiv.textContent === '') { 
+                        // If no records and findMatchingRecords didn't set error (e.g. valid format but no match)
+                         statusDiv.textContent = 'No records for current query with selected formats.';
+                         infoDisplay.textContent = PLACEHOLDER_INFO_TEXT;
+                         outputDiv.innerHTML = ''; // Clear output
+                    }
+                    // If findMatchingRecords set an error, it will persist, which is good.
+                } else { // No display formats checked
+                    outputDiv.innerHTML = ''; // Clear the main output
+                    if (recordsForCurrentQuery.length > 0) { // If query was valid and would have results
+                         statusDiv.textContent = 'Please select a display format.';
+                    } else if (passageInput.value.trim() === '') {
+                        statusDiv.textContent = ''; // Clear status if input is empty and no formats checked
+                    }
+                    // If query was invalid, findMatchingRecords would have set statusDiv.
+                    infoDisplay.textContent = PLACEHOLDER_INFO_TEXT;
+                }
+            } else {
+                // Input is empty AND output is empty, ensure status and info are neutral
+                statusDiv.textContent = '';
+                infoDisplay.textContent = PLACEHOLDER_INFO_TEXT;
+            }
+        }
+        wordsCheckbox.addEventListener('change', handleCheckboxChange);
+        syllablesCheckbox.addEventListener('change', handleCheckboxChange);
+        feetCheckbox.addEventListener('change', handleCheckboxChange);
+
+        outputDiv.addEventListener('click', function(event) {
+            const syllableSpan = event.target.closest('.clickable-syllable');
+            const footSpan = event.target.closest('.clickable-foot');
+
+            if (syllableSpan) {
+                const syllableUrn = syllableSpan.dataset.syllableUrn;
+                if (syllableUrn) {
+                    const urnParts = syllableUrn.split(':');
+                    const passageId = urnParts[urnParts.length - 1];
+                    const nodeComponents = passageId.split('.');
+                    if (nodeComponents.length >= 4) { 
+                        infoDisplay.textContent = `Syllable: ${syllableSpan.textContent} | Foot-Syllable Ref: ${nodeComponents[2]}.${nodeComponents[3]} | Metric: ${syllableSpan.classList.contains('syllable-long') ? 'Long' : syllableSpan.classList.contains('syllable-short') ? 'Short' : 'Anceps'} (URN: ${syllableUrn})`;
+                    } else { infoDisplay.textContent = `Malformed syllable URN for details: ${syllableUrn}`; }
+                } else { infoDisplay.textContent = 'Clicked syllable has no URN data for details.'; }
+            } else if (footSpan) {
+                const footId = footSpan.dataset.footId;
+                const footType = footSpan.dataset.footType;
+                infoDisplay.textContent = `Clicked Foot: ${footId} | Type: ${footType.charAt(0).toUpperCase() + footType.slice(1)}`;
+            }
+            // If neither is clicked, infoDisplay is not changed from its current state (placeholder or previous details)
+        });
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            statusDiv.textContent = "Initializing application..."; // Initial message before data fetching
+            infoDisplay.textContent = PLACEHOLDER_INFO_TEXT; // Set initial placeholder
+            visualizeButton.disabled = true;
+            passageInput.disabled = true;
+            syllablesCheckbox.disabled = true; 
+            feetCheckbox.disabled = true;
+            fetchDataAndParse();
+        });
+    </script>
+</body>
+</html>
+
+
+
+							<script>
+                            	
+        const DATA_URL = 'https://raw.githubusercontent.com/neelsmith/homericlanguage/refs/heads/main/scansion-expanded.cex';
+        
+        let rawDataLines = []; 
+        let parsedData = []; 
+        const columnNames = ['Passage', 'Syllable', 'SyllableText', 'MetricLength', 'Token', 'Half-line'];
+
+        const passageInput = document.getElementById('passage-input');
+        const visualizeButton = document.getElementById('visualize-button');
+        const wordsCheckbox = document.getElementById('words-checkbox');
+        const syllablesCheckbox = document.getElementById('syllables-checkbox');
+        const feetCheckbox = document.getElementById('feet-checkbox'); 
+        const outputDiv = document.getElementById('output');
+        const statusDiv = document.getElementById('status');
+        const infoDisplay = document.getElementById('info-display'); 
+
+        const PLACEHOLDER_INFO_TEXT = 'Details will appear here when an item is clicked.';
+
+        async function fetchDataAndParse() {
+            try {
+                statusDiv.textContent = 'Fetching data... Please wait.'; // Explicitly set loading message
+                const response = await fetch(DATA_URL);
+                if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                const textData = await response.text();
+                statusDiv.textContent = 'Parsing data...'; // Update status
+
+                const lines = textData.trim().split('\n');
+                rawDataLines = lines.slice(1).filter(line => line.trim() !== '');
+
+                parsedData = rawDataLines.map(line => {
+                    const values = line.split('|');
+                    const record = {};
+                    columnNames.forEach((colName, index) => {
+                        record[colName] = (colName === 'Half-line') ? parseInt(values[index], 10) : values[index];
+                    });
+                    return record;
+                });
+
+                statusDiv.textContent = `Data loaded successfully. ${parsedData.length} records processed.`; // Success
+                infoDisplay.textContent = PLACEHOLDER_INFO_TEXT; // Set placeholder after data load
+                visualizeButton.disabled = false;
+                passageInput.disabled = false;
+                syllablesCheckbox.disabled = false; 
+                feetCheckbox.disabled = false; 
+
+            } catch (error) {
+                console.error('Error fetching or parsing data:', error);
+                statusDiv.innerHTML = `<span class="error">Error loading data: ${error.message}. Please check console.</span>`; // Error
+                infoDisplay.textContent = 'Could not load data to display details.'; // Info display reflects error too
+                visualizeButton.disabled = true;
+                passageInput.disabled = true;
+                syllablesCheckbox.disabled = true;
+                feetCheckbox.disabled = true;
+            }
+        }
+
+        function getBookLinePart(passageUrn) {
+            // ... (no changes)
+            if (!passageUrn) return '';
+            const parts = passageUrn.split(':');
+            return parts.length > 0 ? parts[parts.length - 1] : '';
+        }
+
+        function getFootIdFromSyllableUrn(syllableUrn) {
+            // ... (no changes)
+            if (!syllableUrn) return null;
+            const urnParts = syllableUrn.split(':');
+            if (urnParts.length < 2) return null; 
+            const passageIdentifier = urnParts[urnParts.length - 1]; 
+            const nodeComponents = passageIdentifier.split('.'); 
+            if (nodeComponents.length >= 3) { 
+                return nodeComponents[2]; 
+            }
+            return null; 
+        }
+
+        function findMatchingRecords(query) {
+            // ... (no changes to core logic, but status updates are important)
+            if (!query || query.trim() === '') {
+                statusDiv.innerHTML = `<span class="error">Please enter a passage reference.</span>`; return [];
+            }
+            const isRange = query.includes('-');
+            let startRef, endRef;
+            if (isRange) {
+                [startRef, endRef] = query.split('-').map(s => s.trim());
+                if (!startRef || !endRef) {
+                    statusDiv.innerHTML = `<span class="error">Invalid range format. Use BOOK.LINE-BOOK.LINE.</span>`; return [];
+                }
+            } else {
+                startRef = query.trim(); endRef = startRef;
+            }
+            const refRegex = /^\d+\.\d+$/;
+            if (!refRegex.test(startRef) || !refRegex.test(endRef)) {
+                 statusDiv.innerHTML = `<span class="error">Invalid passage reference format. Use BOOK.LINE (e.g., 1.1).</span>`; return [];
+            }
+            const matchedRecords = [];
+            let startIndex = -1, endIndex = -1;
+            for (let i = 0; i < parsedData.length; i++) {
+                const recordPassagePart = getBookLinePart(parsedData[i].Passage);
+                if (recordPassagePart === startRef && startIndex === -1) startIndex = i;
+                if (recordPassagePart === endRef) endIndex = i; 
+            }
+            if (startIndex === -1) { statusDiv.innerHTML = `<span class="error">Start passage ${startRef} not found.</span>`; return []; }
+            if (isRange && endIndex < startIndex) { statusDiv.innerHTML = `<span class="error">End passage ${endRef} not found or before start.</span>`; return []; }
+            if (!isRange && endIndex === -1) { statusDiv.innerHTML = `<span class="error">Passage ${startRef} not found.</span>`; return []; }
+            let trueEndIndex = endIndex;
+            if (endIndex !== -1) {
+                for (let i = endIndex + 1; i < parsedData.length; i++) {
+                    if (getBookLinePart(parsedData[i].Passage) === endRef) trueEndIndex = i;
+                    else break; 
+                }
+            }
+            if (startIndex !== -1 && trueEndIndex !== -1 && trueEndIndex >= startIndex) {
+                for (let i = startIndex; i <= trueEndIndex; i++) matchedRecords.push(parsedData[i]);
+                return matchedRecords;
+            } else {
+                 statusDiv.innerHTML = `<span class="error">Could not find passage range ${startRef}-${endRef}.</span>`; return [];
+            }
+        }
+
+        function formatWords(lineRecords) { /* ... (no changes) ... */ 
+            if (!lineRecords || lineRecords.length === 0) return "";
+            let wordsString = ""; let previousToken = null;
+            lineRecords.forEach((record, index) => {
+                if (index > 0 && record.Token !== previousToken) wordsString += " ";
+                wordsString += record.SyllableText;
+                previousToken = record.Token;
+            });
+            return wordsString;
+        }
+        function formatSyllables(lineRecords) { /* ... (no changes) ... */
+            if (!lineRecords || lineRecords.length === 0) return "";
+            let syllablesHtmlOutput = ""; let previousToken = null;
+            lineRecords.forEach((record, index) => {
+                let syllableClass = 'syllable-unknown'; 
+                switch (record.MetricLength.toLowerCase()) { 
+                    case 'long': syllableClass = 'syllable-long'; break;
+                    case 'short': syllableClass = 'syllable-short'; break;
+                    case 'anceps': syllableClass = 'syllable-anceps'; break;
+                }
+                const safeSyllableText = record.SyllableText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const syllableSpan = `<span class="syllable-display-span clickable-syllable ${syllableClass}" data-syllable-urn="${record.Syllable}">${safeSyllableText}</span>`;
+                if (index === 0) { syllablesHtmlOutput += syllableSpan; } 
+                else {
+                    syllablesHtmlOutput += (record.Token !== previousToken) ? " " : "-";
+                    syllablesHtmlOutput += syllableSpan;
+                }
+                previousToken = record.Token;
+            });
+            return syllablesHtmlOutput; 
+        }
+        function formatFeet(lineRecords) { /* ... (no changes) ... */
+            if (!lineRecords || lineRecords.length === 0) return "";
+            const feetMap = {};
+            lineRecords.forEach(record => {
+                const footId = getFootIdFromSyllableUrn(record.Syllable);
+                if (footId === null) { console.warn("Could not determine foot ID for syllable:", record.Syllable); return; }
+                if (!feetMap[footId]) feetMap[footId] = [];
+                feetMap[footId].push(record);
+            });
+            let feetHtmlOutput = "";
+            const sortedFootIds = Object.keys(feetMap).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+            sortedFootIds.forEach((footId, footIndex) => {
+                const syllablesInFoot = feetMap[footId];
+                if (!syllablesInFoot || syllablesInFoot.length === 0) return;
+                let footText = ""; let previousTokenForFoot = null;
+                syllablesInFoot.forEach((syllableRecord, idx) => {
+                    const safeSyllableText = syllableRecord.SyllableText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    if (idx === 0) footText += safeSyllableText;
+                    else {
+                        footText += (syllableRecord.Token !== previousTokenForFoot) ? " " : "-";
+                        footText += safeSyllableText;
+                    }
+                    previousTokenForFoot = syllableRecord.Token;
+                });
+                const numSyllables = syllablesInFoot.length;
+                let footType = "irregular";
+                if (numSyllables === 2) footType = "spondee"; else if (numSyllables === 3) footType = "dactyl";
+                const colorClass = `foot-color-${(parseInt(footId, 10) - 1) % 6}`;
+                if (footIndex > 0) feetHtmlOutput += `<span class="foot-separator">|</span>`;
+                feetHtmlOutput += `<span class="foot-display-span clickable-foot ${colorClass}" data-foot-id="${footId}" data-foot-type="${footType}">${footText}</span>`;
+            });
+            return feetHtmlOutput;
+        }
+
+        function displayResults() {
+            outputDiv.innerHTML = ''; 
+            // Don't clear statusDiv here, let findMatchingRecords or this function set it appropriately.
+            // If query is valid and yields results, statusDiv will be updated below.
+            // If query is invalid, findMatchingRecords will set the status.
+            
+            // Reset infoDisplay to placeholder *only if* we are about to show results or specific messages.
+            infoDisplay.textContent = PLACEHOLDER_INFO_TEXT; 
+
+            const query = passageInput.value;
+            const records = findMatchingRecords(query); // This might set statusDiv if query is bad
+
+            if (records.length === 0) {
+                if (statusDiv.textContent === '') { // If findMatchingRecords didn't set a specific error for the query
+                    statusDiv.textContent = 'No records found for the given passage.';
+                }
+                // infoDisplay remains PLACEHOLDER_INFO_TEXT or could be set to "No details for empty results."
+                return; 
+            }
+            // If records found, findMatchingRecords did not set an error in statusDiv.
+            // Clear any previous generic status message from data loading if it's still there.
+            statusDiv.textContent = ''; // Clear previous status messages like "Data loaded" if we are showing results.
+
+            const linesToDisplay = {};
+            records.forEach(record => {
+                if (!linesToDisplay[record.Passage]) linesToDisplay[record.Passage] = [];
+                linesToDisplay[record.Passage].push(record);
+            });
+
+            let htmlContent = ''; let displayedSomething = false; 
+
+            for (const passageUrn in linesToDisplay) {
+                const lineRecords = linesToDisplay[passageUrn];
+                const passageRefDisplay = getBookLinePart(passageUrn);
+                let lineHtml = `<div class="line-display"><h3>Line ${passageRefDisplay} (URN: ${passageUrn})</h3>`;
+                let lineHasContent = false;
+
+                if (wordsCheckbox.checked) {
+                    lineHtml += `<h4>Words:</h4><pre>${formatWords(lineRecords)}</pre>`;
+                    lineHasContent = true; displayedSomething = true;
+                }
+                if (syllablesCheckbox.checked) {
+                    lineHtml += `<h4>Syllables:</h4><div class="syllable-visualization-container"><pre>${formatSyllables(lineRecords)}</pre></div>`;
+                    lineHasContent = true; displayedSomething = true;
+                }
+                if (feetCheckbox.checked) {
+                    lineHtml += `<h4>Feet:</h4><div class="feet-visualization-container"><pre>${formatFeet(lineRecords)}</pre></div>`;
+                    lineHasContent = true; displayedSomething = true;
+                }
+                lineHtml += `</div>`;
+                if (lineHasContent) htmlContent += lineHtml;
+            }
+            outputDiv.innerHTML = htmlContent;
+
+            if (!displayedSomething && records.length > 0) { 
+                statusDiv.textContent = 'Please select a display format.'; 
+            } else if (records.length > 0) { 
+                statusDiv.textContent = `Displaying ${Object.keys(linesToDisplay).length} line(s).`; 
+            }
+        }
+
+        // --- Event Listeners ---
+        visualizeButton.addEventListener('click', displayResults);
+        passageInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') displayResults(); });
+        
+        function handleCheckboxChange() {
+            // If there's a query or existing output, re-evaluate
+            if (passageInput.value.trim() !== '' || outputDiv.innerHTML.trim() !== '') {
+                 // Check if any output is still relevant
+                const recordsForCurrentQuery = findMatchingRecords(passageInput.value);
+
+                if (wordsCheckbox.checked || syllablesCheckbox.checked || feetCheckbox.checked) {
+                    // If some display format is selected, and query is valid, display results
+                    if (recordsForCurrentQuery.length > 0 || passageInput.value.trim() === '') { 
+                        // also call displayResults if input is empty to clear things
+                        displayResults();
+                    } else if (statusDiv.textContent === '') { 
+                        // If no records and findMatchingRecords didn't set error (e.g. valid format but no match)
+                         statusDiv.textContent = 'No records for current query with selected formats.';
+                         infoDisplay.textContent = PLACEHOLDER_INFO_TEXT;
+                         outputDiv.innerHTML = ''; // Clear output
+                    }
+                    // If findMatchingRecords set an error, it will persist, which is good.
+                } else { // No display formats checked
+                    outputDiv.innerHTML = ''; // Clear the main output
+                    if (recordsForCurrentQuery.length > 0) { // If query was valid and would have results
+                         statusDiv.textContent = 'Please select a display format.';
+                    } else if (passageInput.value.trim() === '') {
+                        statusDiv.textContent = ''; // Clear status if input is empty and no formats checked
+                    }
+                    // If query was invalid, findMatchingRecords would have set statusDiv.
+                    infoDisplay.textContent = PLACEHOLDER_INFO_TEXT;
+                }
+            } else {
+                // Input is empty AND output is empty, ensure status and info are neutral
+                statusDiv.textContent = '';
+                infoDisplay.textContent = PLACEHOLDER_INFO_TEXT;
+            }
+        }
+        wordsCheckbox.addEventListener('change', handleCheckboxChange);
+        syllablesCheckbox.addEventListener('change', handleCheckboxChange);
+        feetCheckbox.addEventListener('change', handleCheckboxChange);
+
+        outputDiv.addEventListener('click', function(event) {
+            const syllableSpan = event.target.closest('.clickable-syllable');
+            const footSpan = event.target.closest('.clickable-foot');
+
+            if (syllableSpan) {
+                const syllableUrn = syllableSpan.dataset.syllableUrn;
+                if (syllableUrn) {
+                    const urnParts = syllableUrn.split(':');
+                    const passageId = urnParts[urnParts.length - 1];
+                    const nodeComponents = passageId.split('.');
+                    if (nodeComponents.length >= 4) { 
+                        infoDisplay.textContent = `Syllable: ${syllableSpan.textContent} | Foot-Syllable Ref: ${nodeComponents[2]}.${nodeComponents[3]} | Metric: ${syllableSpan.classList.contains('syllable-long') ? 'Long' : syllableSpan.classList.contains('syllable-short') ? 'Short' : 'Anceps'} (URN: ${syllableUrn})`;
+                    } else { infoDisplay.textContent = `Malformed syllable URN for details: ${syllableUrn}`; }
+                } else { infoDisplay.textContent = 'Clicked syllable has no URN data for details.'; }
+            } else if (footSpan) {
+                const footId = footSpan.dataset.footId;
+                const footType = footSpan.dataset.footType;
+                infoDisplay.textContent = `Clicked Foot: ${footId} | Type: ${footType.charAt(0).toUpperCase() + footType.slice(1)}`;
+            }
+            // If neither is clicked, infoDisplay is not changed from its current state (placeholder or previous details)
+        });
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            statusDiv.textContent = "Initializing application..."; // Initial message before data fetching
+            infoDisplay.textContent = PLACEHOLDER_INFO_TEXT; // Set initial placeholder
+            visualizeButton.disabled = true;
+            passageInput.disabled = true;
+            syllablesCheckbox.disabled = true; 
+            feetCheckbox.disabled = true;
+            fetchDataAndParse();
+        });
+    
+
+							</script>
+                        </body>
+                        </html>
+                    
