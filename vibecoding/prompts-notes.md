@@ -28,3 +28,27 @@ Great. For *syllables*, please compose the output as follows. Start with the `Sy
 Excellent. Now let's tweak the syllables display. Let's highlight each syllable with one of three background colors depending on the value of the `MetricLength` of that syllable. If `MetricLength` is `long`, use a gray background; if is it `short`, use a visually distinguishable lighter gray background. If it is `anceps` use an orangeish "caution" color.
 ---
 Beautiful! Now let's make each syllable in the syllables display clickable. When the user clicks on a syllable, display the foot-syllable reference. This is encoded in the final two period-separated pieces of the `Syllable` column's passage value. **Example**: if the value of the `Syllable` column is `urn:cts:greekLit:tlg0012.tlg001.hmtx:6.3.1.2`, then the passage value is the last colon-delimited component `6.3.1.2`; the last two period-separated pieces of that are `1.2` so we would display `1.2` to indicate foot `1`, syllable `2`.
+
+---
+
+Super. Now let's add the display for *feet*. The foot is identified by the third period-separated part of each record's `Syllable` column.  **Example**: if the value of the `Syllable` column is `urn:cts:greekLit:tlg0012.tlg001.hmtx:6.3.1.2`, the foot is identified by `1`. Please create a display that joins the `SyllableText` values using the same logic as for syllables: syllables in the same word are concatenated with hyphens, syllables belonging to new words are concatenated with a space. Instead of highlighting text by syllable value, however, I want to highlight each foot with a visually distinct pastel color. **Example**: if I had 6 records like this:
+
+```
+urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1|urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.1.1|μῆ|long|urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.1|1
+urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1|urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.1.2|νιν|short|urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.1|1
+urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1|urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.1.3|ἄ|short|urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.2|1
+urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1|urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.2.1|ει|long|urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.2|1
+urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1|urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.2.2|δε|short|urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.2|1
+urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1|urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.2.3|θε|short|urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.3|1
+```
+
+the first three all belong to foot `1` of passage `1.1`; the next three all belong to foot `2` of passage `1.1`. The first three should be grouped together and colored one way, the seoncd three grouped together and colored differently.
+
+I would also like to make each *foot* clickable. When a user clicks on a foot, I want to display two pieces of information: the identifying foot number, and whether the foot forms a *dactyl*  or a *spondee*. A foot forms a *dactyl* if it has three syllables, a *spondee* if it has two. In the example above, 6 rows document two feet. The first has ID `1`, and the second has ID `2`. Each of them has 3 syllables, so in this example, each syllable is a *dactyl*.
+
+Please implement this and show the resulting HTML.
+
+
+
+
+making each *syllable* clickable, however, I want to make each *foot* clickable, so 
