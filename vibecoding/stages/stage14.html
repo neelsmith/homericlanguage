@@ -1,0 +1,919 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								        .line-passage-ref {
+            color: silver;
+            font-weight: bold;
+            margin-right: 8px;
+            font-size: 0.9em;
+            display: inline-block; /* To allow margin-right and keep pre on same line */
+        }
+        
+        .line-content-block {
+            margin-bottom: 10px; 
+            padding-top: 5px; 
+        }
+        
+        .line-display-group {
+            margin-bottom: 20px; 
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee; 
+        }
+        .line-display-group:last-child {
+            border-bottom: none; 
+        }
+        
+
+        body { font-family: sans-serif; margin: 20px; }
+        
+        #controls-wrapper { 
+            display: flex; align-items: center; gap: 15px; margin-bottom: 20px;
+        }
+        #passage-controls label, 
+        #display-format-controls > label { margin-right: 5px; }
+        #passage-controls { display: flex; align-items: center; }
+        #passage-controls input[type="text"] { width: 200px; padding: 5px; margin-right: 10px; }
+        #passage-controls button { padding: 6px 12px; }
+        #display-format-controls { display: flex; align-items: center; }
+        #display-format-controls .checkbox-group { margin-left: 10px; display: inline-flex; align-items: center; }
+        #display-format-controls input[type="checkbox"] { margin-right: 3px; }
+        
+        #main-visualization-area { display: flex; gap: 20px; margin-top: 20px; }
+        #output { 
+            flex: 3; 
+            /* No border-top here, as each line-group will have its own top border or spacing */
+            padding-top: 0; /* Adjusted */
+            min-width: 0; 
+        }
+        #info-display {
+            flex: 1; padding: 15px; border: 1px solid #b0c4de; background-color: #f0f8ff; 
+            font-size: 0.9em; color: #333; border-radius: 4px; min-height: 100px; 
+        }
+
+        /* Styling for each line's content block */
+        .line-content-block {
+            margin-bottom: 10px; /* Space below each format's display for a single line */
+            padding-top: 5px; /* Space above each format display */
+        }
+        .line-passage-ref {
+            color: silver;
+            font-weight: bold;
+            margin-right: 8px;
+            font-size: 0.9em;
+            display: inline-block; /* To allow margin-right */
+        }
+         .line-display-group { /* Wrapper for all formats of a single Iliad line */
+            margin-bottom: 20px; /* Space between different Iliad lines */
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee; /* Separator for different Iliad lines */
+        }
+        .line-display-group:last-child {
+            border-bottom: none; /* No border for the very last group */
+        }
+
+
+        .error { color: red; font-weight: bold; }
+        .status { color: blue; margin-bottom: 10px; min-height: 1.2em; }
+        pre { 
+            background-color: #f9f9f9; padding: 10px; border-radius: 4px; 
+            white-space: pre-wrap; word-wrap: break-word; line-height: 1.8; 
+            display: inline-block; /* To keep it on the same line as passage ref if desired */
+            width: calc(100% - 50px); /* Adjust width if passage ref is inline, roughly */
+            vertical-align: top; /* Align with the passage reference */
+            margin-top: 0; /* Remove top margin if passage ref is on its own line */
+        }
+        .line-content-block pre { /* If passage ref is on its own line */
+           /* display: block; 
+           width: 100%; */
+        }
+
+
+        /* Styles for clickable words */
+        .clickable-word {
+            cursor: pointer; padding: 1px 2px; margin: 0 1px; border-radius: 2px;
+        }
+        .clickable-word:hover { background-color: #e9ecef; outline: 1px solid #ced4da; }
+
+        /* Styles for syllable highlighting */
+        .syllable-display-span { 
+            display: inline-block; padding: 2px 4px; margin: 1px 0;         
+            border-radius: 3px; line-height: 1.4; vertical-align: middle;
+        }
+        .syllable-long { background-color: #cccccc; color: #000; }
+        .syllable-short { background-color: #eeeeee; color: #333; }
+        .syllable-anceps { background-color: #ffcc80; color: #573a08; }
+        .syllable-unknown { background-color: #f0f0f0; border: 1px dashed #ccc; }
+        .clickable-syllable { cursor: pointer; }
+        .clickable-syllable:hover { outline: 1px solid #007bff; box-shadow: 0 0 3px rgba(0,123,255,0.5); }
+        /* .syllable-visualization-container pre { background-color: #fff; border: 1px solid #e0e0e0; } */
+        /* Removed specific container pre, relying on general pre now */
+
+        /* Styles for feet display */
+        .foot-display-span {
+            display: inline-block; padding: 3px 6px; margin: 2px 3px 2px 0; 
+            border-radius: 4px; line-height: 1.4; vertical-align: middle;
+            border: 1px solid rgba(0,0,0,0.1); 
+        }
+        .clickable-foot { cursor: pointer; }
+        .clickable-foot:hover { outline: 2px solid #28a745; box-shadow: 0 0 5px rgba(40,167,69,0.6); }
+        .foot-color-0 { background-color: #e0f2f7; } .foot-color-1 { background-color: #e8f5e9; } 
+        .foot-color-2 { background-color: #fffde7; } .foot-color-3 { background-color: #fce4ec; } 
+        .foot-color-4 { background-color: #f3e5f5; } .foot-color-5 { background-color: #fff3e0; } 
+        .foot-separator { display: inline-block; margin: 0 3px; color: #aaa; font-size: 0.9em; vertical-align: middle; }
+        /* .feet-visualization-container pre { background-color: #fff; border: 1px solid #e0e0e0; } */
+        /* Removed specific container pre */
+
+
+    
+
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iliad Scansion Visualizer</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        
+        #controls-wrapper { 
+            display: flex; align-items: center; gap: 15px; margin-bottom: 20px;
+        }
+        #passage-controls label, 
+        #display-format-controls > label { margin-right: 5px; }
+        #passage-controls { display: flex; align-items: center; }
+        #passage-controls input[type="text"] { width: 200px; padding: 5px; margin-right: 10px; }
+        #passage-controls button { padding: 6px 12px; }
+        #display-format-controls { display: flex; align-items: center; }
+        #display-format-controls .checkbox-group { margin-left: 10px; display: inline-flex; align-items: center; }
+        #display-format-controls input[type="checkbox"] { margin-right: 3px; }
+        
+        #main-visualization-area { display: flex; gap: 20px; margin-top: 20px; }
+        #output { 
+            flex: 3; 
+            /* No border-top here, as each line-group will have its own top border or spacing */
+            padding-top: 0; /* Adjusted */
+            min-width: 0; 
+        }
+        #info-display {
+            flex: 1; padding: 15px; border: 1px solid #b0c4de; background-color: #f0f8ff; 
+            font-size: 0.9em; color: #333; border-radius: 4px; min-height: 100px; 
+        }
+
+        /* Styling for each line's content block */
+        .line-content-block {
+            margin-bottom: 10px; /* Space below each format's display for a single line */
+            padding-top: 5px; /* Space above each format display */
+        }
+        .line-passage-ref {
+            color: silver;
+            font-weight: bold;
+            margin-right: 8px;
+            font-size: 0.9em;
+            display: inline-block; /* To allow margin-right */
+        }
+         .line-display-group { /* Wrapper for all formats of a single Iliad line */
+            margin-bottom: 20px; /* Space between different Iliad lines */
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee; /* Separator for different Iliad lines */
+        }
+        .line-display-group:last-child {
+            border-bottom: none; /* No border for the very last group */
+        }
+
+
+        .error { color: red; font-weight: bold; }
+        .status { color: blue; margin-bottom: 10px; min-height: 1.2em; }
+        pre { 
+            background-color: #f9f9f9; padding: 10px; border-radius: 4px; 
+            white-space: pre-wrap; word-wrap: break-word; line-height: 1.8; 
+            display: inline-block; /* To keep it on the same line as passage ref if desired */
+            width: calc(100% - 50px); /* Adjust width if passage ref is inline, roughly */
+            vertical-align: top; /* Align with the passage reference */
+            margin-top: 0; /* Remove top margin if passage ref is on its own line */
+        }
+        .line-content-block pre { /* If passage ref is on its own line */
+           /* display: block; 
+           width: 100%; */
+        }
+
+
+        /* Styles for clickable words */
+        .clickable-word {
+            cursor: pointer; padding: 1px 2px; margin: 0 1px; border-radius: 2px;
+        }
+        .clickable-word:hover { background-color: #e9ecef; outline: 1px solid #ced4da; }
+
+        /* Styles for syllable highlighting */
+        .syllable-display-span { 
+            display: inline-block; padding: 2px 4px; margin: 1px 0;         
+            border-radius: 3px; line-height: 1.4; vertical-align: middle;
+        }
+        .syllable-long { background-color: #cccccc; color: #000; }
+        .syllable-short { background-color: #eeeeee; color: #333; }
+        .syllable-anceps { background-color: #ffcc80; color: #573a08; }
+        .syllable-unknown { background-color: #f0f0f0; border: 1px dashed #ccc; }
+        .clickable-syllable { cursor: pointer; }
+        .clickable-syllable:hover { outline: 1px solid #007bff; box-shadow: 0 0 3px rgba(0,123,255,0.5); }
+        /* .syllable-visualization-container pre { background-color: #fff; border: 1px solid #e0e0e0; } */
+        /* Removed specific container pre, relying on general pre now */
+
+        /* Styles for feet display */
+        .foot-display-span {
+            display: inline-block; padding: 3px 6px; margin: 2px 3px 2px 0; 
+            border-radius: 4px; line-height: 1.4; vertical-align: middle;
+            border: 1px solid rgba(0,0,0,0.1); 
+        }
+        .clickable-foot { cursor: pointer; }
+        .clickable-foot:hover { outline: 2px solid #28a745; box-shadow: 0 0 5px rgba(40,167,69,0.6); }
+        .foot-color-0 { background-color: #e0f2f7; } .foot-color-1 { background-color: #e8f5e9; } 
+        .foot-color-2 { background-color: #fffde7; } .foot-color-3 { background-color: #fce4ec; } 
+        .foot-color-4 { background-color: #f3e5f5; } .foot-color-5 { background-color: #fff3e0; } 
+        .foot-separator { display: inline-block; margin: 0 3px; color: #aaa; font-size: 0.9em; vertical-align: middle; }
+        /* .feet-visualization-container pre { background-color: #fff; border: 1px solid #e0e0e0; } */
+        /* Removed specific container pre */
+
+
+    </style>
+</head>
+<body>
+    <h1>Iliad Scansion Visualizer</h1>
+
+    <div id="controls-wrapper">
+        <div id="passage-controls">
+            <label for="passage-input">Passage (e.g., 1.1 or 1.1-1.5):</label>
+            <input type="text" id="passage-input" value="1.1">
+            <button id="visualize-button">Visualize</button>
+        </div>
+
+        <div id="display-format-controls">
+            <label>Display:</label>
+            <div class="checkbox-group">
+                <input type="checkbox" id="words-checkbox" name="displayFormat" value="words" checked>
+                <label for="words-checkbox">Words</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="syllables-checkbox" name="displayFormat" value="syllables">
+                <label for="syllables-checkbox">Syllables</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="feet-checkbox" name="displayFormat" value="feet">
+                <label for="feet-checkbox">Feet</label>
+            </div>
+        </div>
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <div id="main-visualization-area">
+        <div id="output"></div>
+        <div id="info-display"></div> 
+    </div>
+
+    <script>
+        const DATA_URL = 'https://raw.githubusercontent.com/neelsmith/homericlanguage/refs/heads/main/scansion-expanded.cex';
+        
+        let rawDataLines = []; 
+        let parsedData = []; 
+        const columnNames = ['Passage', 'Syllable', 'SyllableText', 'MetricLength', 'Token', 'Half-line'];
+
+        const passageInput = document.getElementById('passage-input');
+        const visualizeButton = document.getElementById('visualize-button');
+        const wordsCheckbox = document.getElementById('words-checkbox');
+        const syllablesCheckbox = document.getElementById('syllables-checkbox');
+        const feetCheckbox = document.getElementById('feet-checkbox'); 
+        const outputDiv = document.getElementById('output');
+        const statusDiv = document.getElementById('status');
+        const infoDisplay = document.getElementById('info-display'); 
+
+        const PLACEHOLDER_INFO_TEXT = 'Details will appear here when an item is clicked.';
+
+        async function fetchDataAndParse() {
+            try {
+                statusDiv.textContent = 'Fetching data... Please wait.';
+                const response = await fetch(DATA_URL);
+                if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                const textData = await response.text();
+                statusDiv.textContent = 'Parsing data...'; 
+
+                const lines = textData.trim().split('\n');
+                rawDataLines = lines.slice(1).filter(line => line.trim() !== '');
+
+                parsedData = rawDataLines.map(line => {
+                    const values = line.split('|');
+                    const record = {};
+                    columnNames.forEach((colName, index) => {
+                        record[colName] = (colName === 'Half-line') ? parseInt(values[index], 10) : values[index];
+                    });
+                    return record;
+                });
+
+                statusDiv.textContent = `Data loaded successfully. ${parsedData.length} records processed.`;
+                infoDisplay.textContent = PLACEHOLDER_INFO_TEXT; 
+                visualizeButton.disabled = false;
+                passageInput.disabled = false;
+                syllablesCheckbox.disabled = false; 
+                feetCheckbox.disabled = false; 
+
+                if (passageInput.value.trim() !== '' && (wordsCheckbox.checked || syllablesCheckbox.checked || feetCheckbox.checked) ) {
+                    displayResults();
+                }
+
+            } catch (error) {
+                console.error('Error fetching or parsing data:', error);
+                statusDiv.innerHTML = `<span class="error">Error loading data: ${error.message}. Please check console.</span>`;
+                infoDisplay.textContent = 'Could not load data to display details.'; 
+                visualizeButton.disabled = true;
+                passageInput.disabled = true;
+                syllablesCheckbox.disabled = true;
+                feetCheckbox.disabled = true;
+            }
+        }
+
+        function getPassageComponentFromUrn(urnString) {
+            if (!urnString) return '';
+            const parts = urnString.split(':');
+            return parts.length > 0 ? parts[parts.length - 1] : '';
+        }
+
+        function getFootIdFromSyllableUrn(syllableUrn) {
+            if (!syllableUrn) return null;
+            const passageIdentifier = getPassageComponentFromUrn(syllableUrn);
+            const nodeComponents = passageIdentifier.split('.'); 
+            if (nodeComponents.length >= 3) { return nodeComponents[2]; }
+            return null; 
+        }
+
+        function findMatchingRecords(query) {
+            if (!query || query.trim() === '') { return { error: "Please enter a passage reference.", records: [] }; }
+            const isRange = query.includes('-');
+            let startRef, endRef;
+            if (isRange) {
+                [startRef, endRef] = query.split('-').map(s => s.trim());
+                if (!startRef || !endRef) { return { error: "Invalid range format. Use BOOK.LINE-BOOK.LINE.", records: [] }; }
+            } else {
+                startRef = query.trim(); endRef = startRef;
+            }
+            const refRegex = /^\d+\.\d+$/;
+            if (!refRegex.test(startRef) || !refRegex.test(endRef)) {
+                 return { error: "Invalid passage reference format. Use BOOK.LINE (e.g., 1.1).", records: [] };
+            }
+            const matchedRecords = [];
+            let startIndex = -1, endIndex = -1;
+            for (let i = 0; i < parsedData.length; i++) {
+                const recordPassagePart = getPassageComponentFromUrn(parsedData[i].Passage);
+                if (recordPassagePart === startRef && startIndex === -1) startIndex = i;
+                if (recordPassagePart === endRef) endIndex = i; 
+            }
+            if (startIndex === -1) { return { error: `Start passage ${startRef} not found.`, records: [] }; }
+            if (isRange && endIndex < startIndex) { return { error: `End passage ${endRef} not found or occurs before start passage.`, records: [] }; }
+            if (endIndex === -1 && isRange){ return { error: `End passage ${endRef} not found.`, records: [] }; }
+
+            let trueEndIndex = endIndex;
+            if (endIndex !== -1) {
+                for (let i = endIndex + 1; i < parsedData.length; i++) {
+                    if (getPassageComponentFromUrn(parsedData[i].Passage) === endRef) trueEndIndex = i;
+                    else break; 
+                }
+            }
+            if (startIndex !== -1 && trueEndIndex !== -1 && trueEndIndex >= startIndex) {
+                for (let i = startIndex; i <= trueEndIndex; i++) matchedRecords.push(parsedData[i]);
+                return { error: null, records: matchedRecords };
+            } else {
+                 return { error: `Could not find the specified passage range. Start: ${startRef}, End: ${endRef}`, records: [] };
+            }
+        }
+
+        function formatWords(lineRecords) {
+            if (!lineRecords || lineRecords.length === 0) return "";
+            let wordsHtmlOutput = ""; let currentWordSyllables = []; let currentWordTokenUrn = null;
+            function finalizeWord() {
+                if (currentWordSyllables.length > 0 && currentWordTokenUrn) {
+                    const wordText = currentWordSyllables.join('');
+                    const safeWordText = wordText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    wordsHtmlOutput += `<span class="clickable-word" data-token-urn="${currentWordTokenUrn}">${safeWordText}</span>`;
+                    currentWordSyllables = []; currentWordTokenUrn = null;
+                }
+            }
+            lineRecords.forEach((record, index) => {
+                if (index === 0) {
+                    currentWordSyllables.push(record.SyllableText); currentWordTokenUrn = record.Token;
+                } else {
+                    if (record.Token !== currentWordTokenUrn) {
+                        finalizeWord(); wordsHtmlOutput += " "; 
+                        currentWordSyllables.push(record.SyllableText); currentWordTokenUrn = record.Token;
+                    } else { currentWordSyllables.push(record.SyllableText); }
+                }
+            });
+            finalizeWord(); return wordsHtmlOutput; 
+        }
+
+        function formatSyllables(lineRecords) { 
+            if (!lineRecords || lineRecords.length === 0) return "";
+            let syllablesHtmlOutput = ""; let previousToken = null;
+            lineRecords.forEach((record, index) => {
+                let syllableClass = 'syllable-unknown'; 
+                switch (record.MetricLength.toLowerCase()) { 
+                    case 'long': syllableClass = 'syllable-long'; break;
+                    case 'short': syllableClass = 'syllable-short'; break;
+                    case 'anceps': syllableClass = 'syllable-anceps'; break;
+                }
+                const safeSyllableText = record.SyllableText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const syllableSpan = `<span class="syllable-display-span clickable-syllable ${syllableClass}" data-syllable-urn="${record.Syllable}">${safeSyllableText}</span>`;
+                if (index === 0) { syllablesHtmlOutput += syllableSpan; } 
+                else {
+                    syllablesHtmlOutput += (record.Token !== previousToken) ? " " : "-";
+                    syllablesHtmlOutput += syllableSpan;
+                }
+                previousToken = record.Token;
+            });
+            return syllablesHtmlOutput; 
+        }
+        function formatFeet(lineRecords) { 
+            if (!lineRecords || lineRecords.length === 0) return "";
+            const feetMap = {};
+            lineRecords.forEach(record => {
+                const footId = getFootIdFromSyllableUrn(record.Syllable);
+                if (footId === null) { console.warn("Could not determine foot ID for syllable:", record.Syllable); return; }
+                if (!feetMap[footId]) feetMap[footId] = [];
+                feetMap[footId].push(record);
+            });
+            let feetHtmlOutput = "";
+            const sortedFootIds = Object.keys(feetMap).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+            sortedFootIds.forEach((footId, footIndex) => {
+                const syllablesInFoot = feetMap[footId];
+                if (!syllablesInFoot || syllablesInFoot.length === 0) return;
+                let footText = ""; let previousTokenForFoot = null;
+                syllablesInFoot.forEach((syllableRecord, idx) => {
+                    const safeSyllableText = syllableRecord.SyllableText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    if (idx === 0) footText += safeSyllableText;
+                    else {
+                        footText += (syllableRecord.Token !== previousTokenForFoot) ? " " : "-";
+                        footText += safeSyllableText;
+                    }
+                    previousTokenForFoot = syllableRecord.Token;
+                });
+                const numSyllables = syllablesInFoot.length;
+                let footType = "irregular";
+                if (numSyllables === 2) footType = "spondee"; else if (numSyllables === 3) footType = "dactyl";
+                const colorClass = `foot-color-${(parseInt(footId, 10) - 1) % 6}`;
+                if (footIndex > 0) feetHtmlOutput += `<span class="foot-separator">|</span>`;
+                feetHtmlOutput += `<span class="foot-display-span clickable-foot ${colorClass}" data-foot-id="${footId}" data-foot-type="${footType}">${footText}</span>`;
+            });
+            return feetHtmlOutput;
+        }
+
+        function displayResults() {
+            outputDiv.innerHTML = ''; 
+            infoDisplay.textContent = PLACEHOLDER_INFO_TEXT; 
+            statusDiv.textContent = ''; 
+
+            const query = passageInput.value;
+            const result = findMatchingRecords(query); 
+
+            if (result.error) {
+                statusDiv.innerHTML = `<span class="error">${result.error}</span>`;
+                return;
+            }
+
+            const records = result.records;
+            if (records.length === 0) {
+                statusDiv.textContent = 'No records found for the given passage.';
+                return; 
+            }
+            
+            const linesToDisplay = {};
+            records.forEach(record => {
+                if (!linesToDisplay[record.Passage]) linesToDisplay[record.Passage] = [];
+                linesToDisplay[record.Passage].push(record);
+            });
+
+            let overallHtmlContent = ''; 
+            let displayedSomething = false; 
+
+            for (const passageUrn in linesToDisplay) {
+                const lineRecords = linesToDisplay[passageUrn];
+                const passageRefDisplay = getPassageComponentFromUrn(passageUrn);
+                
+                let lineGroupHtml = `<div class="line-display-group">`; // Wrapper for all formats of this line
+
+                if (wordsCheckbox.checked) {
+                    const wordsOutputHtml = formatWords(lineRecords);
+                    lineGroupHtml += `<div class="line-content-block"><span class="line-passage-ref">${passageRefDisplay}</span><pre>${wordsOutputHtml}</pre></div>`;
+                    displayedSomething = true;
+                }
+                if (syllablesCheckbox.checked) {
+                    const syllablesOutputHtml = formatSyllables(lineRecords);
+                    lineGroupHtml += `<div class="line-content-block"><span class="line-passage-ref">${passageRefDisplay}</span><pre>${syllablesOutputHtml}</pre></div>`;
+                    displayedSomething = true;
+                }
+                if (feetCheckbox.checked) {
+                    const feetOutputHtml = formatFeet(lineRecords);
+                    lineGroupHtml += `<div class="line-content-block"><span class="line-passage-ref">${passageRefDisplay}</span><pre>${feetOutputHtml}</pre></div>`;
+                    displayedSomething = true;
+                }
+                lineGroupHtml += `</div>`; // End line-display-group
+                if (displayedSomething) { // Only add if at least one format was displayed for this passageUrn
+                    overallHtmlContent += lineGroupHtml;
+                }
+            }
+            outputDiv.innerHTML = overallHtmlContent;
+
+            if (!displayedSomething && records.length > 0) { 
+                statusDiv.textContent = 'Please select a display format.'; 
+            } else if (records.length > 0) { 
+                statusDiv.textContent = `Displaying ${Object.keys(linesToDisplay).length} Iliad line(s).`; 
+            }
+        }
+
+        function handleCheckboxChange() {
+            if (passageInput.value.trim() !== '' || outputDiv.innerHTML.trim() !== '') {
+                displayResults();
+            } else {
+                if (parsedData.length > 0) { 
+                    statusDiv.textContent = '';
+                    infoDisplay.textContent = PLACEHOLDER_INFO_TEXT;
+                }
+            }
+        }
+
+        visualizeButton.addEventListener('click', displayResults); 
+        passageInput.addEventListener('keypress', (event) => { 
+            if (event.key === 'Enter') { displayResults(); }
+        });
+        
+        wordsCheckbox.addEventListener('change', handleCheckboxChange);
+        syllablesCheckbox.addEventListener('change', handleCheckboxChange);
+        feetCheckbox.addEventListener('change', handleCheckboxChange);
+
+        outputDiv.addEventListener('click', function(event) {
+            const syllableSpan = event.target.closest('.clickable-syllable');
+            const footSpan = event.target.closest('.clickable-foot');
+            const wordSpan = event.target.closest('.clickable-word'); 
+
+            if (wordSpan) {
+                const tokenUrn = wordSpan.dataset.tokenUrn;
+                if (tokenUrn) {
+                    const passageComponent = getPassageComponentFromUrn(tokenUrn);
+                    infoDisplay.textContent = `Clicked Word Token: ${passageComponent} (Full URN: ${tokenUrn})`;
+                } else { infoDisplay.textContent = 'Clicked word has no URN data.'; }
+            } else if (syllableSpan) {
+                const syllableUrn = syllableSpan.dataset.syllableUrn;
+                if (syllableUrn) {
+                    const passageId = getPassageComponentFromUrn(syllableUrn);
+                    const nodeComponents = passageId.split('.');
+                    if (nodeComponents.length >= 4) { 
+                        infoDisplay.textContent = `Syllable: ${syllableSpan.textContent} | Foot-Syllable Ref: ${nodeComponents[2]}.${nodeComponents[3]} | Metric: ${syllableSpan.classList.contains('syllable-long') ? 'Long' : syllableSpan.classList.contains('syllable-short') ? 'Short' : 'Anceps'} (URN: ${syllableUrn})`;
+                    } else { infoDisplay.textContent = `Malformed syllable URN for details: ${syllableUrn}`; }
+                } else { infoDisplay.textContent = 'Clicked syllable has no URN data for details.'; }
+            } else if (footSpan) {
+                const footId = footSpan.dataset.footId;
+                const footType = footSpan.dataset.footType;
+                infoDisplay.textContent = `Clicked Foot: ${footId} | Type: ${footType.charAt(0).toUpperCase() + footType.slice(1)}`;
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            statusDiv.textContent = "Initializing application..."; 
+            infoDisplay.textContent = PLACEHOLDER_INFO_TEXT; 
+            visualizeButton.disabled = true;
+            passageInput.disabled = true;
+            syllablesCheckbox.disabled = true; 
+            feetCheckbox.disabled = true;
+            fetchDataAndParse();
+        });
+    </script>
+</body>
+</html>
+
+
+
+							<script>
+                            	
+        const DATA_URL = 'https://raw.githubusercontent.com/neelsmith/homericlanguage/refs/heads/main/scansion-expanded.cex';
+        
+        let rawDataLines = []; 
+        let parsedData = []; 
+        const columnNames = ['Passage', 'Syllable', 'SyllableText', 'MetricLength', 'Token', 'Half-line'];
+
+        const passageInput = document.getElementById('passage-input');
+        const visualizeButton = document.getElementById('visualize-button');
+        const wordsCheckbox = document.getElementById('words-checkbox');
+        const syllablesCheckbox = document.getElementById('syllables-checkbox');
+        const feetCheckbox = document.getElementById('feet-checkbox'); 
+        const outputDiv = document.getElementById('output');
+        const statusDiv = document.getElementById('status');
+        const infoDisplay = document.getElementById('info-display'); 
+
+        const PLACEHOLDER_INFO_TEXT = 'Details will appear here when an item is clicked.';
+
+        async function fetchDataAndParse() {
+            try {
+                statusDiv.textContent = 'Fetching data... Please wait.';
+                const response = await fetch(DATA_URL);
+                if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                const textData = await response.text();
+                statusDiv.textContent = 'Parsing data...'; 
+
+                const lines = textData.trim().split('\n');
+                rawDataLines = lines.slice(1).filter(line => line.trim() !== '');
+
+                parsedData = rawDataLines.map(line => {
+                    const values = line.split('|');
+                    const record = {};
+                    columnNames.forEach((colName, index) => {
+                        record[colName] = (colName === 'Half-line') ? parseInt(values[index], 10) : values[index];
+                    });
+                    return record;
+                });
+
+                statusDiv.textContent = `Data loaded successfully. ${parsedData.length} records processed.`;
+                infoDisplay.textContent = PLACEHOLDER_INFO_TEXT; 
+                visualizeButton.disabled = false;
+                passageInput.disabled = false;
+                syllablesCheckbox.disabled = false; 
+                feetCheckbox.disabled = false; 
+
+                if (passageInput.value.trim() !== '' && (wordsCheckbox.checked || syllablesCheckbox.checked || feetCheckbox.checked) ) {
+                    displayResults();
+                }
+
+            } catch (error) {
+                console.error('Error fetching or parsing data:', error);
+                statusDiv.innerHTML = `<span class="error">Error loading data: ${error.message}. Please check console.</span>`;
+                infoDisplay.textContent = 'Could not load data to display details.'; 
+                visualizeButton.disabled = true;
+                passageInput.disabled = true;
+                syllablesCheckbox.disabled = true;
+                feetCheckbox.disabled = true;
+            }
+        }
+
+        function getPassageComponentFromUrn(urnString) {
+            if (!urnString) return '';
+            const parts = urnString.split(':');
+            return parts.length > 0 ? parts[parts.length - 1] : '';
+        }
+
+        function getFootIdFromSyllableUrn(syllableUrn) {
+            if (!syllableUrn) return null;
+            const passageIdentifier = getPassageComponentFromUrn(syllableUrn);
+            const nodeComponents = passageIdentifier.split('.'); 
+            if (nodeComponents.length >= 3) { return nodeComponents[2]; }
+            return null; 
+        }
+
+        function findMatchingRecords(query) {
+            if (!query || query.trim() === '') { return { error: "Please enter a passage reference.", records: [] }; }
+            const isRange = query.includes('-');
+            let startRef, endRef;
+            if (isRange) {
+                [startRef, endRef] = query.split('-').map(s => s.trim());
+                if (!startRef || !endRef) { return { error: "Invalid range format. Use BOOK.LINE-BOOK.LINE.", records: [] }; }
+            } else {
+                startRef = query.trim(); endRef = startRef;
+            }
+            const refRegex = /^\d+\.\d+$/;
+            if (!refRegex.test(startRef) || !refRegex.test(endRef)) {
+                 return { error: "Invalid passage reference format. Use BOOK.LINE (e.g., 1.1).", records: [] };
+            }
+            const matchedRecords = [];
+            let startIndex = -1, endIndex = -1;
+            for (let i = 0; i < parsedData.length; i++) {
+                const recordPassagePart = getPassageComponentFromUrn(parsedData[i].Passage);
+                if (recordPassagePart === startRef && startIndex === -1) startIndex = i;
+                if (recordPassagePart === endRef) endIndex = i; 
+            }
+            if (startIndex === -1) { return { error: `Start passage ${startRef} not found.`, records: [] }; }
+            if (isRange && endIndex < startIndex) { return { error: `End passage ${endRef} not found or occurs before start passage.`, records: [] }; }
+            if (endIndex === -1 && isRange){ return { error: `End passage ${endRef} not found.`, records: [] }; }
+
+            let trueEndIndex = endIndex;
+            if (endIndex !== -1) {
+                for (let i = endIndex + 1; i < parsedData.length; i++) {
+                    if (getPassageComponentFromUrn(parsedData[i].Passage) === endRef) trueEndIndex = i;
+                    else break; 
+                }
+            }
+            if (startIndex !== -1 && trueEndIndex !== -1 && trueEndIndex >= startIndex) {
+                for (let i = startIndex; i <= trueEndIndex; i++) matchedRecords.push(parsedData[i]);
+                return { error: null, records: matchedRecords };
+            } else {
+                 return { error: `Could not find the specified passage range. Start: ${startRef}, End: ${endRef}`, records: [] };
+            }
+        }
+
+        function formatWords(lineRecords) {
+            if (!lineRecords || lineRecords.length === 0) return "";
+            let wordsHtmlOutput = ""; let currentWordSyllables = []; let currentWordTokenUrn = null;
+            function finalizeWord() {
+                if (currentWordSyllables.length > 0 && currentWordTokenUrn) {
+                    const wordText = currentWordSyllables.join('');
+                    const safeWordText = wordText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    wordsHtmlOutput += `<span class="clickable-word" data-token-urn="${currentWordTokenUrn}">${safeWordText}</span>`;
+                    currentWordSyllables = []; currentWordTokenUrn = null;
+                }
+            }
+            lineRecords.forEach((record, index) => {
+                if (index === 0) {
+                    currentWordSyllables.push(record.SyllableText); currentWordTokenUrn = record.Token;
+                } else {
+                    if (record.Token !== currentWordTokenUrn) {
+                        finalizeWord(); wordsHtmlOutput += " "; 
+                        currentWordSyllables.push(record.SyllableText); currentWordTokenUrn = record.Token;
+                    } else { currentWordSyllables.push(record.SyllableText); }
+                }
+            });
+            finalizeWord(); return wordsHtmlOutput; 
+        }
+
+        function formatSyllables(lineRecords) { 
+            if (!lineRecords || lineRecords.length === 0) return "";
+            let syllablesHtmlOutput = ""; let previousToken = null;
+            lineRecords.forEach((record, index) => {
+                let syllableClass = 'syllable-unknown'; 
+                switch (record.MetricLength.toLowerCase()) { 
+                    case 'long': syllableClass = 'syllable-long'; break;
+                    case 'short': syllableClass = 'syllable-short'; break;
+                    case 'anceps': syllableClass = 'syllable-anceps'; break;
+                }
+                const safeSyllableText = record.SyllableText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const syllableSpan = `<span class="syllable-display-span clickable-syllable ${syllableClass}" data-syllable-urn="${record.Syllable}">${safeSyllableText}</span>`;
+                if (index === 0) { syllablesHtmlOutput += syllableSpan; } 
+                else {
+                    syllablesHtmlOutput += (record.Token !== previousToken) ? " " : "-";
+                    syllablesHtmlOutput += syllableSpan;
+                }
+                previousToken = record.Token;
+            });
+            return syllablesHtmlOutput; 
+        }
+        function formatFeet(lineRecords) { 
+            if (!lineRecords || lineRecords.length === 0) return "";
+            const feetMap = {};
+            lineRecords.forEach(record => {
+                const footId = getFootIdFromSyllableUrn(record.Syllable);
+                if (footId === null) { console.warn("Could not determine foot ID for syllable:", record.Syllable); return; }
+                if (!feetMap[footId]) feetMap[footId] = [];
+                feetMap[footId].push(record);
+            });
+            let feetHtmlOutput = "";
+            const sortedFootIds = Object.keys(feetMap).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+            sortedFootIds.forEach((footId, footIndex) => {
+                const syllablesInFoot = feetMap[footId];
+                if (!syllablesInFoot || syllablesInFoot.length === 0) return;
+                let footText = ""; let previousTokenForFoot = null;
+                syllablesInFoot.forEach((syllableRecord, idx) => {
+                    const safeSyllableText = syllableRecord.SyllableText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    if (idx === 0) footText += safeSyllableText;
+                    else {
+                        footText += (syllableRecord.Token !== previousTokenForFoot) ? " " : "-";
+                        footText += safeSyllableText;
+                    }
+                    previousTokenForFoot = syllableRecord.Token;
+                });
+                const numSyllables = syllablesInFoot.length;
+                let footType = "irregular";
+                if (numSyllables === 2) footType = "spondee"; else if (numSyllables === 3) footType = "dactyl";
+                const colorClass = `foot-color-${(parseInt(footId, 10) - 1) % 6}`;
+                if (footIndex > 0) feetHtmlOutput += `<span class="foot-separator">|</span>`;
+                feetHtmlOutput += `<span class="foot-display-span clickable-foot ${colorClass}" data-foot-id="${footId}" data-foot-type="${footType}">${footText}</span>`;
+            });
+            return feetHtmlOutput;
+        }
+
+        function displayResults() {
+            outputDiv.innerHTML = ''; 
+            infoDisplay.textContent = PLACEHOLDER_INFO_TEXT; 
+            statusDiv.textContent = ''; 
+
+            const query = passageInput.value;
+            const result = findMatchingRecords(query); 
+
+            if (result.error) {
+                statusDiv.innerHTML = `<span class="error">${result.error}</span>`;
+                return;
+            }
+
+            const records = result.records;
+            if (records.length === 0) {
+                statusDiv.textContent = 'No records found for the given passage.';
+                return; 
+            }
+            
+            const linesToDisplay = {};
+            records.forEach(record => {
+                if (!linesToDisplay[record.Passage]) linesToDisplay[record.Passage] = [];
+                linesToDisplay[record.Passage].push(record);
+            });
+
+            let overallHtmlContent = ''; 
+            let displayedSomething = false; 
+
+            for (const passageUrn in linesToDisplay) {
+                const lineRecords = linesToDisplay[passageUrn];
+                const passageRefDisplay = getPassageComponentFromUrn(passageUrn);
+                
+                let lineGroupHtml = `<div class="line-display-group">`; // Wrapper for all formats of this line
+
+                if (wordsCheckbox.checked) {
+                    const wordsOutputHtml = formatWords(lineRecords);
+                    lineGroupHtml += `<div class="line-content-block"><span class="line-passage-ref">${passageRefDisplay}</span><pre>${wordsOutputHtml}</pre></div>`;
+                    displayedSomething = true;
+                }
+                if (syllablesCheckbox.checked) {
+                    const syllablesOutputHtml = formatSyllables(lineRecords);
+                    lineGroupHtml += `<div class="line-content-block"><span class="line-passage-ref">${passageRefDisplay}</span><pre>${syllablesOutputHtml}</pre></div>`;
+                    displayedSomething = true;
+                }
+                if (feetCheckbox.checked) {
+                    const feetOutputHtml = formatFeet(lineRecords);
+                    lineGroupHtml += `<div class="line-content-block"><span class="line-passage-ref">${passageRefDisplay}</span><pre>${feetOutputHtml}</pre></div>`;
+                    displayedSomething = true;
+                }
+                lineGroupHtml += `</div>`; // End line-display-group
+                if (displayedSomething) { // Only add if at least one format was displayed for this passageUrn
+                    overallHtmlContent += lineGroupHtml;
+                }
+            }
+            outputDiv.innerHTML = overallHtmlContent;
+
+            if (!displayedSomething && records.length > 0) { 
+                statusDiv.textContent = 'Please select a display format.'; 
+            } else if (records.length > 0) { 
+                statusDiv.textContent = `Displaying ${Object.keys(linesToDisplay).length} Iliad line(s).`; 
+            }
+        }
+
+        function handleCheckboxChange() {
+            if (passageInput.value.trim() !== '' || outputDiv.innerHTML.trim() !== '') {
+                displayResults();
+            } else {
+                if (parsedData.length > 0) { 
+                    statusDiv.textContent = '';
+                    infoDisplay.textContent = PLACEHOLDER_INFO_TEXT;
+                }
+            }
+        }
+
+        visualizeButton.addEventListener('click', displayResults); 
+        passageInput.addEventListener('keypress', (event) => { 
+            if (event.key === 'Enter') { displayResults(); }
+        });
+        
+        wordsCheckbox.addEventListener('change', handleCheckboxChange);
+        syllablesCheckbox.addEventListener('change', handleCheckboxChange);
+        feetCheckbox.addEventListener('change', handleCheckboxChange);
+
+        outputDiv.addEventListener('click', function(event) {
+            const syllableSpan = event.target.closest('.clickable-syllable');
+            const footSpan = event.target.closest('.clickable-foot');
+            const wordSpan = event.target.closest('.clickable-word'); 
+
+            if (wordSpan) {
+                const tokenUrn = wordSpan.dataset.tokenUrn;
+                if (tokenUrn) {
+                    const passageComponent = getPassageComponentFromUrn(tokenUrn);
+                    infoDisplay.textContent = `Clicked Word Token: ${passageComponent} (Full URN: ${tokenUrn})`;
+                } else { infoDisplay.textContent = 'Clicked word has no URN data.'; }
+            } else if (syllableSpan) {
+                const syllableUrn = syllableSpan.dataset.syllableUrn;
+                if (syllableUrn) {
+                    const passageId = getPassageComponentFromUrn(syllableUrn);
+                    const nodeComponents = passageId.split('.');
+                    if (nodeComponents.length >= 4) { 
+                        infoDisplay.textContent = `Syllable: ${syllableSpan.textContent} | Foot-Syllable Ref: ${nodeComponents[2]}.${nodeComponents[3]} | Metric: ${syllableSpan.classList.contains('syllable-long') ? 'Long' : syllableSpan.classList.contains('syllable-short') ? 'Short' : 'Anceps'} (URN: ${syllableUrn})`;
+                    } else { infoDisplay.textContent = `Malformed syllable URN for details: ${syllableUrn}`; }
+                } else { infoDisplay.textContent = 'Clicked syllable has no URN data for details.'; }
+            } else if (footSpan) {
+                const footId = footSpan.dataset.footId;
+                const footType = footSpan.dataset.footType;
+                infoDisplay.textContent = `Clicked Foot: ${footId} | Type: ${footType.charAt(0).toUpperCase() + footType.slice(1)}`;
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            statusDiv.textContent = "Initializing application..."; 
+            infoDisplay.textContent = PLACEHOLDER_INFO_TEXT; 
+            visualizeButton.disabled = true;
+            passageInput.disabled = true;
+            syllablesCheckbox.disabled = true; 
+            feetCheckbox.disabled = true;
+            fetchDataAndParse();
+        });
+    
+
+							</script>
+                        </body>
+                        </html>
+                    

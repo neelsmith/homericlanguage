@@ -73,6 +73,24 @@ Perfect! Now I'd like to make the display of words interactive. Each word should
 ---
 
 
-u2225 "Parallel to"
+Great! Now let's focus more on the display elements. Please remove the labelling headers "Words:", "Syllables:" and "Feet:", and the larger header that gives the line and the URN. Instead, just before each displayed line (whether words, syllables or feet), please prepend in a silver color the book line reference (the same value previously displayed in the labelling header as "Line"). **Example**: if the current version would display the text "Line 1.7 (URN: urn:cts:greekLit:tlg0012.tlg001.hmtx:1.7)" in a labelling header, we will remove that and instead place the string "1.7" before each of the displays in a silver color.
+
+---
 
 
+This is great! Now I'd  like to add one refinement to the display of syllables. When composing the string to display, add a special rule for the first syllable that has a value of `2` for the `Half-line` column. Precede this syllable by the string ` ∥ ` (that is a space on either side of the Unicode "parallel to" character, u2225) in a larger size, then add the `SyllableText` value. Do not change behavior for any other syllables.
+
+---
+
+
+We broke the display of "Feet". Words and syllable work right with this modification, but "Feet" just diplays "undefined". Please fix.
+
+---
+
+
+Great! Now I want to tweak the messages that are displayed when a user clicks on an item.
+For words: instead of "Clicked Word Token:" followed by the reference, use "Word token:" followed by the reference; omit the parenthesized expression with full URN.
+For syllables: instead of "Foot-Syllable Ref:" followed by the reference, just "Foot-syllable:" followed by the reference. Instead of "Metric:" use "Length:" followed by the value. No further information should be displayed for syllables.
+For feet: instead of "Clicked Foot:" followed by the value, just "Foot:" followed by the value. Instead of "| Type:", just ", ".
+
+ 
