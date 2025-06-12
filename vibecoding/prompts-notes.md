@@ -48,7 +48,8 @@ I would also like to make each *foot* clickable. When a user clicks on a foot, I
 
 Please implement this and show the resulting HTML.
 
+---
 
-
-
-making each *syllable* clickable, however, I want to make each *foot* clickable, so 
+All the functionality is perfect! Now let's tweak the layout a little without in any way changing the functionality of the app. I'd like to start by placing the area for displaying details when the user clicks in a column to the right of the displayed lines. 
+---
+This is good, but two messages are lingering when it seems they should be hidden. In the right hand column, there is a separate blue box with the text "Details will appear here when an item is clicked." even after I click on an item and the details are correctly displayed. In the left hand column, the message "Loading data... Please wait" remains even after the data have been loaded. Could you check that?

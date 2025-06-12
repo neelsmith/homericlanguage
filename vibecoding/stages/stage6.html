@@ -16,37 +16,24 @@
         button { padding: 8px 15px; margin-left: 10px; cursor: pointer; }
         #controls, #display-options { margin-bottom: 20px; }
         
-        /* New main area for side-by-side layout */
-        #main-visualization-area {
-            display: flex;
-            gap: 20px; /* Space between output and info panel */
-            margin-top: 20px;
-        }
-
-        #output { 
-            flex: 3; /* Output takes more space */
-            border-top: 1px solid #ccc; 
-            padding-top: 10px; 
-            min-width: 0; /* Important for flex items to prevent overflow */
-        }
-
-        #info-display {
-            flex: 1; /* Info panel takes less space */
-            padding: 15px; /* Increased padding for better appearance as a panel */
-            border: 1px solid #b0c4de; 
-            background-color: #f0f8ff; 
+        #info-display { /* Renamed from syllable-info-display for general use */
+            margin-top: 15px;
+            margin-bottom: 10px;
+            padding: 8px 10px;
+            border: 1px solid #b0c4de; /* LightSteelBlue */
+            min-height: 20px;
+            background-color: #f0f8ff; /* AliceBlue */
             font-size: 0.9em;
             color: #333;
             border-radius: 4px;
-            min-height: 100px; /* Give it some initial height */
-            /* align-self: flex-start; /* Optional: if you don't want it to stretch full height */
         }
 
+        #output { margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px; }
         .line-display { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #eee; }
         .line-display h3 { margin-top: 0; font-size: 1.1em; }
         .line-display h4 { margin-top: 10px; margin-bottom: 5px; font-size: 1em; }
         .error { color: red; font-weight: bold; }
-        .status { color: blue; } /* Status message style */
+        .status { color: blue; }
         pre { 
             background-color: #f9f9f9; 
             padding: 10px; 
@@ -58,8 +45,12 @@
 
         /* Styles for syllable highlighting */
         .syllable-display-span { 
-            display: inline-block; padding: 2px 4px; margin: 1px 0;         
-            border-radius: 3px; line-height: 1.4; vertical-align: middle;
+            display: inline-block; 
+            padding: 2px 4px;      
+            margin: 1px 0;         
+            border-radius: 3px;    
+            line-height: 1.4;      
+            vertical-align: middle;
         }
         .syllable-long { background-color: #cccccc; color: #000; }
         .syllable-short { background-color: #eeeeee; color: #333; }
@@ -71,16 +62,33 @@
 
         /* Styles for feet display */
         .foot-display-span {
-            display: inline-block; padding: 3px 6px; margin: 2px 3px 2px 0; 
-            border-radius: 4px; line-height: 1.4; vertical-align: middle;
-            border: 1px solid rgba(0,0,0,0.1); 
+            display: inline-block;
+            padding: 3px 6px;
+            margin: 2px 3px 2px 0; /* Add some right margin for spacing between feet */
+            border-radius: 4px;
+            line-height: 1.4;
+            vertical-align: middle;
+            border: 1px solid rgba(0,0,0,0.1); /* Subtle border for definition */
         }
         .clickable-foot { cursor: pointer; }
-        .clickable-foot:hover { outline: 2px solid #28a745; box-shadow: 0 0 5px rgba(40,167,69,0.6); }
-        .foot-color-0 { background-color: #e0f2f7; } .foot-color-1 { background-color: #e8f5e9; } 
-        .foot-color-2 { background-color: #fffde7; } .foot-color-3 { background-color: #fce4ec; } 
-        .foot-color-4 { background-color: #f3e5f5; } .foot-color-5 { background-color: #fff3e0; } 
-        .foot-separator { display: inline-block; margin: 0 3px; color: #aaa; font-size: 0.9em; vertical-align: middle; }
+        .clickable-foot:hover {
+            outline: 2px solid #28a745; /* Green outline for feet */
+            box-shadow: 0 0 5px rgba(40,167,69,0.6);
+        }
+        /* Pastel colors for feet (up to 6 for hexameter) */
+        .foot-color-0 { background-color: #e0f2f7; } /* Light cyan/blue */
+        .foot-color-1 { background-color: #e8f5e9; } /* Light green */
+        .foot-color-2 { background-color: #fffde7; } /* Light yellow */
+        .foot-color-3 { background-color: #fce4ec; } /* Light pink */
+        .foot-color-4 { background-color: #f3e5f5; } /* Light purple/lavender */
+        .foot-color-5 { background-color: #fff3e0; } /* Light orange/peach */
+        .foot-separator { 
+            display: inline-block; 
+            margin: 0 3px; 
+            color: #aaa;
+            font-size: 0.9em;
+            vertical-align: middle;
+        }
         .feet-visualization-container pre { background-color: #fff; border: 1px solid #e0e0e0; }
 
     
@@ -101,37 +109,24 @@
         button { padding: 8px 15px; margin-left: 10px; cursor: pointer; }
         #controls, #display-options { margin-bottom: 20px; }
         
-        /* New main area for side-by-side layout */
-        #main-visualization-area {
-            display: flex;
-            gap: 20px; /* Space between output and info panel */
-            margin-top: 20px;
-        }
-
-        #output { 
-            flex: 3; /* Output takes more space */
-            border-top: 1px solid #ccc; 
-            padding-top: 10px; 
-            min-width: 0; /* Important for flex items to prevent overflow */
-        }
-
-        #info-display {
-            flex: 1; /* Info panel takes less space */
-            padding: 15px; /* Increased padding for better appearance as a panel */
-            border: 1px solid #b0c4de; 
-            background-color: #f0f8ff; 
+        #info-display { /* Renamed from syllable-info-display for general use */
+            margin-top: 15px;
+            margin-bottom: 10px;
+            padding: 8px 10px;
+            border: 1px solid #b0c4de; /* LightSteelBlue */
+            min-height: 20px;
+            background-color: #f0f8ff; /* AliceBlue */
             font-size: 0.9em;
             color: #333;
             border-radius: 4px;
-            min-height: 100px; /* Give it some initial height */
-            /* align-self: flex-start; /* Optional: if you don't want it to stretch full height */
         }
 
+        #output { margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px; }
         .line-display { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #eee; }
         .line-display h3 { margin-top: 0; font-size: 1.1em; }
         .line-display h4 { margin-top: 10px; margin-bottom: 5px; font-size: 1em; }
         .error { color: red; font-weight: bold; }
-        .status { color: blue; } /* Status message style */
+        .status { color: blue; }
         pre { 
             background-color: #f9f9f9; 
             padding: 10px; 
@@ -143,8 +138,12 @@
 
         /* Styles for syllable highlighting */
         .syllable-display-span { 
-            display: inline-block; padding: 2px 4px; margin: 1px 0;         
-            border-radius: 3px; line-height: 1.4; vertical-align: middle;
+            display: inline-block; 
+            padding: 2px 4px;      
+            margin: 1px 0;         
+            border-radius: 3px;    
+            line-height: 1.4;      
+            vertical-align: middle;
         }
         .syllable-long { background-color: #cccccc; color: #000; }
         .syllable-short { background-color: #eeeeee; color: #333; }
@@ -156,16 +155,33 @@
 
         /* Styles for feet display */
         .foot-display-span {
-            display: inline-block; padding: 3px 6px; margin: 2px 3px 2px 0; 
-            border-radius: 4px; line-height: 1.4; vertical-align: middle;
-            border: 1px solid rgba(0,0,0,0.1); 
+            display: inline-block;
+            padding: 3px 6px;
+            margin: 2px 3px 2px 0; /* Add some right margin for spacing between feet */
+            border-radius: 4px;
+            line-height: 1.4;
+            vertical-align: middle;
+            border: 1px solid rgba(0,0,0,0.1); /* Subtle border for definition */
         }
         .clickable-foot { cursor: pointer; }
-        .clickable-foot:hover { outline: 2px solid #28a745; box-shadow: 0 0 5px rgba(40,167,69,0.6); }
-        .foot-color-0 { background-color: #e0f2f7; } .foot-color-1 { background-color: #e8f5e9; } 
-        .foot-color-2 { background-color: #fffde7; } .foot-color-3 { background-color: #fce4ec; } 
-        .foot-color-4 { background-color: #f3e5f5; } .foot-color-5 { background-color: #fff3e0; } 
-        .foot-separator { display: inline-block; margin: 0 3px; color: #aaa; font-size: 0.9em; vertical-align: middle; }
+        .clickable-foot:hover {
+            outline: 2px solid #28a745; /* Green outline for feet */
+            box-shadow: 0 0 5px rgba(40,167,69,0.6);
+        }
+        /* Pastel colors for feet (up to 6 for hexameter) */
+        .foot-color-0 { background-color: #e0f2f7; } /* Light cyan/blue */
+        .foot-color-1 { background-color: #e8f5e9; } /* Light green */
+        .foot-color-2 { background-color: #fffde7; } /* Light yellow */
+        .foot-color-3 { background-color: #fce4ec; } /* Light pink */
+        .foot-color-4 { background-color: #f3e5f5; } /* Light purple/lavender */
+        .foot-color-5 { background-color: #fff3e0; } /* Light orange/peach */
+        .foot-separator { 
+            display: inline-block; 
+            margin: 0 3px; 
+            color: #aaa;
+            font-size: 0.9em;
+            vertical-align: middle;
+        }
         .feet-visualization-container pre { background-color: #fff; border: 1px solid #e0e0e0; }
 
     </style>
@@ -192,16 +208,8 @@
     </div>
 
     <div id="status">Loading data... Please wait.</div>
-
-    <!-- New wrapper for main content area -->
-    <div id="main-visualization-area">
-        <div id="output">
-            <!-- Line displays will be injected here by JavaScript -->
-        </div>
-        <div id="info-display">
-            Details will appear here when an item is clicked.
-        </div>
-    </div>
+    <div id="info-display">Details will appear here when an item is clicked.</div>
+    <div id="output"></div>
 
     <script>
         const DATA_URL = 'https://raw.githubusercontent.com/neelsmith/homericlanguage/refs/heads/main/scansion-expanded.cex';
@@ -214,10 +222,10 @@
         const visualizeButton = document.getElementById('visualize-button');
         const wordsCheckbox = document.getElementById('words-checkbox');
         const syllablesCheckbox = document.getElementById('syllables-checkbox');
-        const feetCheckbox = document.getElementById('feet-checkbox'); 
+        const feetCheckbox = document.getElementById('feet-checkbox'); // Get reference
         const outputDiv = document.getElementById('output');
         const statusDiv = document.getElementById('status');
-        const infoDisplay = document.getElementById('info-display'); 
+        const infoDisplay = document.getElementById('info-display'); // Renamed
 
         async function fetchDataAndParse() {
             try {
@@ -243,7 +251,7 @@
                 visualizeButton.disabled = false;
                 passageInput.disabled = false;
                 syllablesCheckbox.disabled = false; 
-                feetCheckbox.disabled = false; 
+                feetCheckbox.disabled = false; // Enable feet checkbox
 
             } catch (error) {
                 console.error('Error fetching or parsing data:', error);
@@ -265,17 +273,20 @@
             if (!syllableUrn) return null;
             const urnParts = syllableUrn.split(':');
             if (urnParts.length < 2) return null; 
-            const passageIdentifier = urnParts[urnParts.length - 1]; 
-            const nodeComponents = passageIdentifier.split('.'); 
-            if (nodeComponents.length >= 3) { 
-                return nodeComponents[2]; 
+            const passageIdentifier = urnParts[urnParts.length - 1]; // e.g., "1.1.1.1"
+            const nodeComponents = passageIdentifier.split('.'); // e.g., ["1", "1", "1", "1"]
+            if (nodeComponents.length >= 3) { // Need at least Book.Line.Foot
+                return nodeComponents[2]; // Foot ID is the third component (0-indexed)
             }
-            return null; 
+            return null; // or handle as an error/unknown
         }
 
+
         function findMatchingRecords(query) {
+            // ... (this function remains the same)
             if (!query || query.trim() === '') {
-                statusDiv.innerHTML = `<span class="error">Please enter a passage reference.</span>`; return [];
+                statusDiv.innerHTML = `<span class="error">Please enter a passage reference.</span>`;
+                return [];
             }
             const isRange = query.includes('-');
             let startRef, endRef;
@@ -317,6 +328,7 @@
         }
 
         function formatWords(lineRecords) {
+            // ... (this function remains the same)
             if (!lineRecords || lineRecords.length === 0) return "";
             let wordsString = ""; let previousToken = null;
             lineRecords.forEach((record, index) => {
@@ -328,6 +340,7 @@
         }
 
         function formatSyllables(lineRecords) {
+            // ... (this function remains the same, ensure data-syllable-urn is correct)
              if (!lineRecords || lineRecords.length === 0) return "";
             let syllablesHtmlOutput = ""; let previousToken = null;
             lineRecords.forEach((record, index) => {
@@ -351,35 +364,60 @@
 
         function formatFeet(lineRecords) {
             if (!lineRecords || lineRecords.length === 0) return "";
+
             const feetMap = {};
+            // 1. Group syllables by foot ID
             lineRecords.forEach(record => {
                 const footId = getFootIdFromSyllableUrn(record.Syllable);
-                if (footId === null) { console.warn("Could not determine foot ID for syllable:", record.Syllable); return; }
-                if (!feetMap[footId]) feetMap[footId] = [];
+                if (footId === null) {
+                    console.warn("Could not determine foot ID for syllable:", record.Syllable);
+                    return; // Skip syllables where foot ID can't be found
+                }
+                if (!feetMap[footId]) {
+                    feetMap[footId] = [];
+                }
                 feetMap[footId].push(record);
             });
+
             let feetHtmlOutput = "";
+            // Sort foot IDs numerically to ensure correct order, as object key order isn't guaranteed
             const sortedFootIds = Object.keys(feetMap).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+
             sortedFootIds.forEach((footId, footIndex) => {
                 const syllablesInFoot = feetMap[footId];
                 if (!syllablesInFoot || syllablesInFoot.length === 0) return;
-                let footText = ""; let previousTokenForFoot = null;
+
+                // 2. Construct text for the current foot (hyphens/spaces)
+                let footText = "";
+                let previousTokenForFoot = null;
                 syllablesInFoot.forEach((syllableRecord, idx) => {
                     const safeSyllableText = syllableRecord.SyllableText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                    if (idx === 0) footText += safeSyllableText;
-                    else {
+                    if (idx === 0) {
+                        footText += safeSyllableText;
+                    } else {
                         footText += (syllableRecord.Token !== previousTokenForFoot) ? " " : "-";
                         footText += safeSyllableText;
                     }
                     previousTokenForFoot = syllableRecord.Token;
                 });
+
+                // 3. Determine foot type
                 const numSyllables = syllablesInFoot.length;
                 let footType = "irregular";
-                if (numSyllables === 2) footType = "spondee"; else if (numSyllables === 3) footType = "dactyl";
-                const colorClass = `foot-color-${(parseInt(footId, 10) - 1) % 6}`;
-                if (footIndex > 0) feetHtmlOutput += `<span class="foot-separator">|</span>`;
+                if (numSyllables === 2) footType = "spondee";
+                else if (numSyllables === 3) footType = "dactyl";
+
+                // 4. Determine color class
+                const colorClass = `foot-color-${(parseInt(footId, 10) - 1) % 6}`; // Cycle through 6 colors, 1-indexed footId
+
+                // Add a separator before the second foot onwards
+                if (footIndex > 0) {
+                    feetHtmlOutput += `<span class="foot-separator">|</span>`;
+                }
+                
                 feetHtmlOutput += `<span class="foot-display-span clickable-foot ${colorClass}" data-foot-id="${footId}" data-foot-type="${footType}">${footText}</span>`;
             });
+
             return feetHtmlOutput;
         }
 
@@ -423,7 +461,7 @@
                 lineHtml += `</div>`;
                 if (lineHasContent) htmlContent += lineHtml;
             }
-            outputDiv.innerHTML = htmlContent; // Inject into the #output div within the flex container
+            outputDiv.innerHTML = htmlContent;
 
             if (!displayedSomething && records.length > 0) { statusDiv.textContent = 'Please select a display format.'; }
             else if (records.length > 0) { statusDiv.textContent = `Displaying ${Object.keys(linesToDisplay).length} line(s).`; }
@@ -450,9 +488,6 @@
         syllablesCheckbox.addEventListener('change', handleCheckboxChange);
         feetCheckbox.addEventListener('change', handleCheckboxChange);
 
-        // Event listener needs to target outputDiv because that's where the clickable spans are.
-        // If infoDisplay was also inside outputDiv, then a single listener on main-visualization-area would be fine.
-        // For now, clicks are only expected within #output for interactive elements.
         outputDiv.addEventListener('click', function(event) {
             const syllableSpan = event.target.closest('.clickable-syllable');
             const footSpan = event.target.closest('.clickable-foot');
@@ -463,7 +498,7 @@
                     const urnParts = syllableUrn.split(':');
                     const passageId = urnParts[urnParts.length - 1];
                     const nodeComponents = passageId.split('.');
-                    if (nodeComponents.length >= 4) { 
+                    if (nodeComponents.length >= 4) { // B.L.F.S
                         infoDisplay.textContent = `Syllable: ${syllableSpan.textContent} | Foot-Syllable Ref: ${nodeComponents[2]}.${nodeComponents[3]} | Metric: ${syllableSpan.classList.contains('syllable-long') ? 'Long' : syllableSpan.classList.contains('syllable-short') ? 'Short' : 'Anceps'} (URN: ${syllableUrn})`;
                     } else { infoDisplay.textContent = `Malformed syllable URN: ${syllableUrn}`; }
                 } else { infoDisplay.textContent = 'Syllable has no URN data.'; }
@@ -486,18 +521,6 @@
 </body>
 </html>
 
-    <div id="status">Loading data... Please wait.</div>
-
-    <!-- New wrapper for main content area -->
-    <div id="main-visualization-area">
-        <div id="output">
-            <!-- Line displays will be injected here by JavaScript -->
-        </div>
-        <div id="info-display">
-            Details will appear here when an item is clicked.
-        </div>
-    </div>
-    
 
 
 							<script>
@@ -512,10 +535,10 @@
         const visualizeButton = document.getElementById('visualize-button');
         const wordsCheckbox = document.getElementById('words-checkbox');
         const syllablesCheckbox = document.getElementById('syllables-checkbox');
-        const feetCheckbox = document.getElementById('feet-checkbox'); 
+        const feetCheckbox = document.getElementById('feet-checkbox'); // Get reference
         const outputDiv = document.getElementById('output');
         const statusDiv = document.getElementById('status');
-        const infoDisplay = document.getElementById('info-display'); 
+        const infoDisplay = document.getElementById('info-display'); // Renamed
 
         async function fetchDataAndParse() {
             try {
@@ -541,7 +564,7 @@
                 visualizeButton.disabled = false;
                 passageInput.disabled = false;
                 syllablesCheckbox.disabled = false; 
-                feetCheckbox.disabled = false; 
+                feetCheckbox.disabled = false; // Enable feet checkbox
 
             } catch (error) {
                 console.error('Error fetching or parsing data:', error);
@@ -563,17 +586,20 @@
             if (!syllableUrn) return null;
             const urnParts = syllableUrn.split(':');
             if (urnParts.length < 2) return null; 
-            const passageIdentifier = urnParts[urnParts.length - 1]; 
-            const nodeComponents = passageIdentifier.split('.'); 
-            if (nodeComponents.length >= 3) { 
-                return nodeComponents[2]; 
+            const passageIdentifier = urnParts[urnParts.length - 1]; // e.g., "1.1.1.1"
+            const nodeComponents = passageIdentifier.split('.'); // e.g., ["1", "1", "1", "1"]
+            if (nodeComponents.length >= 3) { // Need at least Book.Line.Foot
+                return nodeComponents[2]; // Foot ID is the third component (0-indexed)
             }
-            return null; 
+            return null; // or handle as an error/unknown
         }
 
+
         function findMatchingRecords(query) {
+            // ... (this function remains the same)
             if (!query || query.trim() === '') {
-                statusDiv.innerHTML = `<span class="error">Please enter a passage reference.</span>`; return [];
+                statusDiv.innerHTML = `<span class="error">Please enter a passage reference.</span>`;
+                return [];
             }
             const isRange = query.includes('-');
             let startRef, endRef;
@@ -615,6 +641,7 @@
         }
 
         function formatWords(lineRecords) {
+            // ... (this function remains the same)
             if (!lineRecords || lineRecords.length === 0) return "";
             let wordsString = ""; let previousToken = null;
             lineRecords.forEach((record, index) => {
@@ -626,6 +653,7 @@
         }
 
         function formatSyllables(lineRecords) {
+            // ... (this function remains the same, ensure data-syllable-urn is correct)
              if (!lineRecords || lineRecords.length === 0) return "";
             let syllablesHtmlOutput = ""; let previousToken = null;
             lineRecords.forEach((record, index) => {
@@ -649,35 +677,60 @@
 
         function formatFeet(lineRecords) {
             if (!lineRecords || lineRecords.length === 0) return "";
+
             const feetMap = {};
+            // 1. Group syllables by foot ID
             lineRecords.forEach(record => {
                 const footId = getFootIdFromSyllableUrn(record.Syllable);
-                if (footId === null) { console.warn("Could not determine foot ID for syllable:", record.Syllable); return; }
-                if (!feetMap[footId]) feetMap[footId] = [];
+                if (footId === null) {
+                    console.warn("Could not determine foot ID for syllable:", record.Syllable);
+                    return; // Skip syllables where foot ID can't be found
+                }
+                if (!feetMap[footId]) {
+                    feetMap[footId] = [];
+                }
                 feetMap[footId].push(record);
             });
+
             let feetHtmlOutput = "";
+            // Sort foot IDs numerically to ensure correct order, as object key order isn't guaranteed
             const sortedFootIds = Object.keys(feetMap).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+
             sortedFootIds.forEach((footId, footIndex) => {
                 const syllablesInFoot = feetMap[footId];
                 if (!syllablesInFoot || syllablesInFoot.length === 0) return;
-                let footText = ""; let previousTokenForFoot = null;
+
+                // 2. Construct text for the current foot (hyphens/spaces)
+                let footText = "";
+                let previousTokenForFoot = null;
                 syllablesInFoot.forEach((syllableRecord, idx) => {
                     const safeSyllableText = syllableRecord.SyllableText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                    if (idx === 0) footText += safeSyllableText;
-                    else {
+                    if (idx === 0) {
+                        footText += safeSyllableText;
+                    } else {
                         footText += (syllableRecord.Token !== previousTokenForFoot) ? " " : "-";
                         footText += safeSyllableText;
                     }
                     previousTokenForFoot = syllableRecord.Token;
                 });
+
+                // 3. Determine foot type
                 const numSyllables = syllablesInFoot.length;
                 let footType = "irregular";
-                if (numSyllables === 2) footType = "spondee"; else if (numSyllables === 3) footType = "dactyl";
-                const colorClass = `foot-color-${(parseInt(footId, 10) - 1) % 6}`;
-                if (footIndex > 0) feetHtmlOutput += `<span class="foot-separator">|</span>`;
+                if (numSyllables === 2) footType = "spondee";
+                else if (numSyllables === 3) footType = "dactyl";
+
+                // 4. Determine color class
+                const colorClass = `foot-color-${(parseInt(footId, 10) - 1) % 6}`; // Cycle through 6 colors, 1-indexed footId
+
+                // Add a separator before the second foot onwards
+                if (footIndex > 0) {
+                    feetHtmlOutput += `<span class="foot-separator">|</span>`;
+                }
+                
                 feetHtmlOutput += `<span class="foot-display-span clickable-foot ${colorClass}" data-foot-id="${footId}" data-foot-type="${footType}">${footText}</span>`;
             });
+
             return feetHtmlOutput;
         }
 
@@ -721,7 +774,7 @@
                 lineHtml += `</div>`;
                 if (lineHasContent) htmlContent += lineHtml;
             }
-            outputDiv.innerHTML = htmlContent; // Inject into the #output div within the flex container
+            outputDiv.innerHTML = htmlContent;
 
             if (!displayedSomething && records.length > 0) { statusDiv.textContent = 'Please select a display format.'; }
             else if (records.length > 0) { statusDiv.textContent = `Displaying ${Object.keys(linesToDisplay).length} line(s).`; }
@@ -748,9 +801,6 @@
         syllablesCheckbox.addEventListener('change', handleCheckboxChange);
         feetCheckbox.addEventListener('change', handleCheckboxChange);
 
-        // Event listener needs to target outputDiv because that's where the clickable spans are.
-        // If infoDisplay was also inside outputDiv, then a single listener on main-visualization-area would be fine.
-        // For now, clicks are only expected within #output for interactive elements.
         outputDiv.addEventListener('click', function(event) {
             const syllableSpan = event.target.closest('.clickable-syllable');
             const footSpan = event.target.closest('.clickable-foot');
@@ -761,7 +811,7 @@
                     const urnParts = syllableUrn.split(':');
                     const passageId = urnParts[urnParts.length - 1];
                     const nodeComponents = passageId.split('.');
-                    if (nodeComponents.length >= 4) { 
+                    if (nodeComponents.length >= 4) { // B.L.F.S
                         infoDisplay.textContent = `Syllable: ${syllableSpan.textContent} | Foot-Syllable Ref: ${nodeComponents[2]}.${nodeComponents[3]} | Metric: ${syllableSpan.classList.contains('syllable-long') ? 'Long' : syllableSpan.classList.contains('syllable-short') ? 'Short' : 'Anceps'} (URN: ${syllableUrn})`;
                     } else { infoDisplay.textContent = `Malformed syllable URN: ${syllableUrn}`; }
                 } else { infoDisplay.textContent = 'Syllable has no URN data.'; }
