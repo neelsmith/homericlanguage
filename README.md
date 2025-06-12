@@ -12,7 +12,7 @@
 
 Scansion of the *Iliad* is based on the openly available data provided at https://hypotactic.com/use-the-source/
 
-> *I have not yet found information on the site indicating how to credit the author properly*.
+> *I have not yet found information on `hypotactic.com` indicating how to credit the author properly*.
 
 
 `hypotactic.com` has 24 CSV files organized by book.  Each has a header line with these column labels:
