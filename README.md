@@ -4,6 +4,10 @@
 
 
 
+## Vibe-coded apps
+
+- `apps/metricreader.html`: read an *Iliad* text with full metrical analysis
+
 ## Source for scansion
 
 Scansion of the *Iliad* is based on the openly available data provided at https://hypotactic.com/use-the-source/
