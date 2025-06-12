@@ -20,4 +20,24 @@ Create a pageable list of results.
 Please implement this in an HTML page.
 
 ---
-Great! Add a menu for search type with three option: "contains", "begins with", "ends with". 
+
+Great! Add a menu for search type with three option: "contains", "begins with", "ends with".  In searching, if the user chooses "begins with" only match lines beginning with the user-supplied string. Similarly, only give lines ending with the user supplied string if the user choosed "ends with". No change in behavior if the user chooses "contains" which should be the default
+
+---
+
+The next feature I'd like to add is an option to include metrical constraints. If the user chooses this option, she should be able to enter a string with the pattern `FOOT.SYLLABLE`. This corresponds to the final part of the `Syllable` column in each data record. **Example**: 
+if a record has a `Syllable` value `urn:cts:greekLit:tlg0012.tlg001.hmtx:3.5.1.2`, then the foot is `1` and the syllable is `2`: this would match a user request for `1.2`.
+
+If the search mode is `ends with`, then nothing changes but if the search mode is `contains`, the app should only return results that are completely contained in the syllables beginning from the designated one to the end of the line. **Example**: the user searches for a string `μηνιν` with a  metrical constraint of `5.1`. A raw string search gets a result pointing to `urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1`; this resolves to a fully accented string that begins with the string `μῆνιν`. We find in the data records for `urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1` that this is represented by two records:
+
+```
+urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1|urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.1.1|μῆ|long|urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.1|1
+urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1|urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.1.2|νιν|short|urn:cts:greekLit:tlg0012.tlg001.hmtx:1.1.1|1
+```
+
+But we see that the foot-syllable references are `1.1` and `1.2` and are not included in the text beginning from `5.1`: we have to exclude this result.
+
+
+If the search mode is `starts with` then the matching syllable must begin exactly at the requested foot-sylable position.
+
+Plesae implement this.
