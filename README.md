@@ -4,6 +4,15 @@
 
 
 
+## Datasets
+
+For each of the *Iliad*s in the Homer Multitext project archive, we create:
+
+- a corpus of citable tokens
+- a corpus of citable syllables, defined phonetically
+
+We map the corpus of phonetic syllables to a corpus of metrical syllables, and coordinate those with metrical scansion provided by `hypotactic.com` (see below).
+
 ## Vibe-coded apps
 
 
@@ -34,7 +43,7 @@ The data can actually include as many as 10 comma-delimited columns, however. He
 `37,"τοξ’,",long,3,3,hemi1,Chryses,newpara,speech,Chryses`
 
 
-## Data preparation
+### Formatting and sanitizing scansion data
 
 1. Tested CSV structure of raw files in `source-IliadAllCSV/raw`. Worked on a copy in `source-IliadAllCSV/cleaner`to correct lines with invalid delimited-text format.
 2. Ran the script `scripts/cexify.jl` to reformat 24 sources files in `source-IliadAllCSV/cleaner` to a single file using CTS URNs to identify passages; wrote output to `scansion.cex`  
