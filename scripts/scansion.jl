@@ -46,7 +46,7 @@ end
 
 
 for hmtiliad in hmtiliads
-    iliadversion = map(p -> versionid(p.urn), hmtiliad) |> unique |> String
+    iliadversion = hmtiliad[1] |> urn |> versionid
 
     @info("Start processing $(iliadversion)")
     iliadsyllables = ["urn|text"]    
