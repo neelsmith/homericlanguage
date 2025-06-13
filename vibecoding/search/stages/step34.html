@@ -75,7 +75,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metrically aware text search</title> <!-- CHANGED -->
+    <title>Iliad Text Search</title>
     <style>
         body { font-family: sans-serif; margin: 20px; }
         .main-container { display: flex; gap: 20px; } 
@@ -135,8 +135,7 @@
     </style>
 </head>
 <body>
-    <h1>Metrically aware text search</h1> <!-- CHANGED -->
-
+    <h1>Iliad Text Search</h1>
     <div class="main-container">
         <div class="search-content-area">
             <div class="control-group">
@@ -321,6 +320,7 @@
                         }
                     }
                     if (targetRecordIndex === -1 && searchMode !== 'contains' && searchMode !== 'follows' && searchMode !== 'precedes') { 
+                        // Stricter modes like starts_from, ends_at MUST find the constraint
                         continue; 
                     }
                 }
@@ -329,7 +329,7 @@
                 let foundMatchForThisLine = false;
 
                 if (searchMode === 'starts_from') {
-                    if (targetRecordIndex === -1) continue; 
+                    if (targetRecordIndex === -1) continue; // Constraint is mandatory and must be found
                     
                     let accumulatedText = "";
                     for (let k = 0; k < (lineRecords.length - targetRecordIndex); k++) {
@@ -354,7 +354,7 @@
                         }
                     }
                 } else if (searchMode === 'ends_at') {
-                     if (targetRecordIndex === -1) continue; 
+                     if (targetRecordIndex === -1) continue; // Constraint is mandatory
                     for (let i = 0; i <= targetRecordIndex; i++) { 
                         const segmentRecords = lineRecords.slice(i, targetRecordIndex + 1);
                         const textOfSegment = buildSimplifiedTextFromRecords(segmentRecords);
@@ -370,20 +370,26 @@
                             const segmentRecords = lineRecords.slice(i, j + 1);
                             const textOfSegment = buildSimplifiedTextFromRecords(segmentRecords);
                             if (textOfSegment.startsWith(simplifiedQuery)) {
-                                if (textOfSegment.length >= simplifiedQuery.length) {
-                                    matchStartIndex = i;
+                                if (textOfSegment.length >= simplifiedQuery.length) { // Current segment is long enough
+                                    // Now check if the *query* is a prefix of the *segment*
+                                    // OR if segment is prefix of query (for partials)
+                                    // This logic ensures we highlight correctly for partials
                                     let tempEnd = i;
-                                    for(let k_idx=0; k_idx <= (j-i) ; k_idx++){
-                                        const tempText = buildSimplifiedTextFromRecords(lineRecords.slice(i, i+k_idx+1));
+                                    let tempText = "";
+                                    for(let k_idx = 0; k_idx <= (j-i); k_idx++){
+                                        tempText = buildSimplifiedTextFromRecords(lineRecords.slice(i, i + k_idx + 1));
                                         if(tempText.length >= simplifiedQuery.length){
-                                            if(tempText.startsWith(simplifiedQuery)) tempEnd = i+k_idx; else tempEnd = i+k_idx-1;
+                                            if(tempText.startsWith(simplifiedQuery)) tempEnd = i + k_idx;
+                                            else tempEnd = i + k_idx -1; // Went one too far
                                             break;
                                         }
-                                        if(k_idx === (j-i) && simplifiedQuery.startsWith(tempText)) tempEnd = j; 
+                                        if(k_idx === (j-i) && simplifiedQuery.startsWith(tempText)) tempEnd = j; // Query is longer, but segment is valid prefix
                                     }
+                                    matchStartIndex = i;
                                     matchEndIndex = Math.max(matchStartIndex, tempEnd);
                                     foundMatchForThisLine = true; break; 
                                 }
+                                // If segment is shorter than query but is a prefix, continue extending j
                             } else if (textOfSegment.length > 0 && simplifiedQuery.length < textOfSegment.length && !simplifiedQuery.startsWith(textOfSegment) ) {
                                 break; 
                             } else if (textOfSegment.length >= simplifiedQuery.length && !textOfSegment.startsWith(simplifiedQuery)) {
@@ -410,9 +416,10 @@
                                     if(k_idx === (j-i) && simplifiedQuery.startsWith(tempText)) tempEnd = j;
                                 }
                                 const currentMatchEnd = Math.max(i, tempEnd);
-                                const queryEquivalentSegment = buildSimplifiedTextFromRecords(lineRecords.slice(i, currentMatchEnd + 1)).substring(0, simplifiedQuery.length);
+                                // Check if the segment of query length is indeed the query
+                                const queryEquivalentText = buildSimplifiedTextFromRecords(lineRecords.slice(i, currentMatchEnd + 1)).substring(0, simplifiedQuery.length);
 
-                                if (queryEquivalentSegment === simplifiedQuery) {
+                                if (queryEquivalentText === simplifiedQuery) {
                                      lastFoundStart = i; 
                                      lastFoundEnd = currentMatchEnd; 
                                 }
@@ -511,7 +518,99 @@
 
 
 							<script>
-                            	
+                            	                if (searchMode === 'starts_from') {
+                    // This check was: if (targetRecordIndex === -1 && (constraintFoot || constraintSyllableInFoot)) continue; 
+                    // It should be simpler: if a constraint was expected (because it's 'starts_from') and not found, then continue.
+                    if (targetRecordIndex === -1) continue; // If constraint not found, this line cannot match this mode.
+                    
+                    // The searchFromIdx was redundant here, it's always targetRecordIndex for this mode.
+                    // let searchFromIdx = targetRecordIndex !== -1 ? targetRecordIndex : 0; 
+                    
+                    let textBuilt = "";
+                    for (let k = 0; k < (lineRecords.length - targetRecordIndex); k++) { // Iterate from the constraint point
+                        const segmentToTest = lineRecords.slice(targetRecordIndex, targetRecordIndex + k + 1);
+                        textBuilt = buildSimplifiedTextFromRecords(segmentToTest);
+
+                        if (textBuilt.startsWith(simplifiedQuery)) {
+                            // If it starts with the query, we need to determine if enough text has been built
+                            // to match the query length for highlighting purposes.
+                            if (textBuilt.length >= simplifiedQuery.length) { 
+                                matchStartIndex = targetRecordIndex; // Match starts at the constraint
+                                // Refine matchEndIndex: it's the current end of the segment 'k' relative to targetRecordIndex
+                                // which is simply targetRecordIndex + k, IF textBuilt truly forms the query.
+                                // The inner loop to refine 'matchEndIndex' was trying to re-verify, 
+                                // but since 'textBuilt' itself is the accumulated string, 
+                                // if it startsWith and is long enough, 'targetRecordIndex + k' is the end.
+                                // We need to find the *shortest* k that satisfies this.
+                                
+                                // Simpler refinement for matchEndIndex:
+                                let tempAccumulatedForEnd = "";
+                                for(let l_idx = 0; l_idx <= k; l_idx++) {
+                                    tempAccumulatedForEnd = buildSimplifiedTextFromRecords(lineRecords.slice(targetRecordIndex, targetRecordIndex + l_idx + 1));
+                                    if (tempAccumulatedForEnd.length >= simplifiedQuery.length) {
+                                        // Check if this segment, cut to query length, is the query
+                                        if (tempAccumulatedForEnd.substring(0, simplifiedQuery.length) === simplifiedQuery) {
+                                            matchEndIndex = targetRecordIndex + l_idx;
+                                        } else {
+                                            // This should ideally not happen if the outer startsWith was true
+                                            // and we are checking progressively.
+                                            // If it does, it means the query was a prefix of a shorter segment
+                                            // than the one currently being tested by 'k'.
+                                            // We need to ensure 'k' is the minimal length.
+                                            // The outer loop structure handles finding the minimal 'k'.
+                                            matchEndIndex = targetRecordIndex + l_idx; // Tentative
+                                        }
+                                        break; // Found sufficient length
+                                    }
+                                }
+                                if (matchEndIndex < matchStartIndex) matchEndIndex = matchStartIndex; // single syllable
+                                foundMatchForThisLine = true; 
+                                break; // Found the match for this line, break from 'k' loop
+                            }
+                            // If textBuilt is shorter but startsWith, continue 'k' loop to accumulate more
+                        } else {
+                            // textBuilt no longer starts with simplifiedQuery, so this path is dead
+                            break; 
+                        }
+                    }
+                }
+
+                if (searchMode === 'starts_from') {
+                    if (targetRecordIndex === -1) { // A foot.syllable constraint IS REQUIRED for this mode
+                        continue; 
+                    }
+                    
+                    // Try to build the query starting from targetRecordIndex
+                    let accumulatedText = "";
+                    for (let k = 0; k < (lineRecords.length - targetRecordIndex); k++) {
+                        const currentSyllableIndexInLine = targetRecordIndex + k;
+                        const segmentForThisIteration = lineRecords.slice(targetRecordIndex, currentSyllableIndexInLine + 1);
+                        accumulatedText = buildSimplifiedTextFromRecords(segmentForThisIteration);
+
+                        if (simplifiedQuery.startsWith(accumulatedText) && simplifiedQuery.length >= accumulatedText.length) {
+                            // The query is still potentially formable by or equal to what we've built
+                            if (accumulatedText === simplifiedQuery) { // Exact match
+                                matchStartIndex = targetRecordIndex;
+                                matchEndIndex = currentSyllableIndexInLine;
+                                foundMatchForThisLine = true;
+                                break; // Found exact match
+                            }
+                            // If accumulatedText is a prefix of simplifiedQuery, continue accumulating
+                        } else if (accumulatedText.startsWith(simplifiedQuery)) { 
+                            // accumulatedText is now longer than simplifiedQuery but starts with it
+                            // This means simplifiedQuery was a prefix of what we just built.
+                            matchStartIndex = targetRecordIndex;
+                            matchEndIndex = currentSyllableIndexInLine; // Highlight up to this point
+                            foundMatchForThisLine = true;
+                            break;
+                        } else {
+                            // Accumulated text no longer matches the start of the query, or query isn't a prefix of it.
+                            break; // Stop trying to extend from targetRecordIndex
+                        }
+                    }
+                }
+
+
         const DATA_URL = 'https://raw.githubusercontent.com/neelsmith/homericlanguage/refs/heads/main/scansion-expanded.cex';
         const RESULTS_PER_PAGE = 10;
         let linesData = {};
@@ -658,6 +757,7 @@
                         }
                     }
                     if (targetRecordIndex === -1 && searchMode !== 'contains' && searchMode !== 'follows' && searchMode !== 'precedes') { 
+                        // Stricter modes like starts_from, ends_at MUST find the constraint
                         continue; 
                     }
                 }
@@ -666,7 +766,7 @@
                 let foundMatchForThisLine = false;
 
                 if (searchMode === 'starts_from') {
-                    if (targetRecordIndex === -1) continue; 
+                    if (targetRecordIndex === -1) continue; // Constraint is mandatory and must be found
                     
                     let accumulatedText = "";
                     for (let k = 0; k < (lineRecords.length - targetRecordIndex); k++) {
@@ -691,7 +791,7 @@
                         }
                     }
                 } else if (searchMode === 'ends_at') {
-                     if (targetRecordIndex === -1) continue; 
+                     if (targetRecordIndex === -1) continue; // Constraint is mandatory
                     for (let i = 0; i <= targetRecordIndex; i++) { 
                         const segmentRecords = lineRecords.slice(i, targetRecordIndex + 1);
                         const textOfSegment = buildSimplifiedTextFromRecords(segmentRecords);
@@ -707,20 +807,26 @@
                             const segmentRecords = lineRecords.slice(i, j + 1);
                             const textOfSegment = buildSimplifiedTextFromRecords(segmentRecords);
                             if (textOfSegment.startsWith(simplifiedQuery)) {
-                                if (textOfSegment.length >= simplifiedQuery.length) {
-                                    matchStartIndex = i;
+                                if (textOfSegment.length >= simplifiedQuery.length) { // Current segment is long enough
+                                    // Now check if the *query* is a prefix of the *segment*
+                                    // OR if segment is prefix of query (for partials)
+                                    // This logic ensures we highlight correctly for partials
                                     let tempEnd = i;
-                                    for(let k_idx=0; k_idx <= (j-i) ; k_idx++){
-                                        const tempText = buildSimplifiedTextFromRecords(lineRecords.slice(i, i+k_idx+1));
+                                    let tempText = "";
+                                    for(let k_idx = 0; k_idx <= (j-i); k_idx++){
+                                        tempText = buildSimplifiedTextFromRecords(lineRecords.slice(i, i + k_idx + 1));
                                         if(tempText.length >= simplifiedQuery.length){
-                                            if(tempText.startsWith(simplifiedQuery)) tempEnd = i+k_idx; else tempEnd = i+k_idx-1;
+                                            if(tempText.startsWith(simplifiedQuery)) tempEnd = i + k_idx;
+                                            else tempEnd = i + k_idx -1; // Went one too far
                                             break;
                                         }
-                                        if(k_idx === (j-i) && simplifiedQuery.startsWith(tempText)) tempEnd = j; 
+                                        if(k_idx === (j-i) && simplifiedQuery.startsWith(tempText)) tempEnd = j; // Query is longer, but segment is valid prefix
                                     }
+                                    matchStartIndex = i;
                                     matchEndIndex = Math.max(matchStartIndex, tempEnd);
                                     foundMatchForThisLine = true; break; 
                                 }
+                                // If segment is shorter than query but is a prefix, continue extending j
                             } else if (textOfSegment.length > 0 && simplifiedQuery.length < textOfSegment.length && !simplifiedQuery.startsWith(textOfSegment) ) {
                                 break; 
                             } else if (textOfSegment.length >= simplifiedQuery.length && !textOfSegment.startsWith(simplifiedQuery)) {
@@ -747,9 +853,10 @@
                                     if(k_idx === (j-i) && simplifiedQuery.startsWith(tempText)) tempEnd = j;
                                 }
                                 const currentMatchEnd = Math.max(i, tempEnd);
-                                const queryEquivalentSegment = buildSimplifiedTextFromRecords(lineRecords.slice(i, currentMatchEnd + 1)).substring(0, simplifiedQuery.length);
+                                // Check if the segment of query length is indeed the query
+                                const queryEquivalentText = buildSimplifiedTextFromRecords(lineRecords.slice(i, currentMatchEnd + 1)).substring(0, simplifiedQuery.length);
 
-                                if (queryEquivalentSegment === simplifiedQuery) {
+                                if (queryEquivalentText === simplifiedQuery) {
                                      lastFoundStart = i; 
                                      lastFoundEnd = currentMatchEnd; 
                                 }

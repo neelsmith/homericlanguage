@@ -55,3 +55,21 @@ OK but now the search mode menu and input for foot-syllable are repeated. Please
 ---
 
 Display looks good but now the searches don't work if metrical constraints are included. Did you lose track of which HTML elements to use?
+
+---
+
+Great. Change the label "Search Text:" to "Search for text:".   Change the label "Foot-syllable:" to "Constrain to foot.syllable:"
+
+---
+
+Now you've duplicated all the user input and menu areas again! What's up with that? Please fix!
+
+---
+Excellent! One tiny bug: results of search with metrical constraint produce correct results for "Contains (anywhere)",  "Ends at constraint",  "Follows constraint", and "Precedes constraint", but is failing on "Start from constraint". Could you fix this?
+
+---
+
+This is great! Could you change the title of the page and the top-level heading from "Iliad Text Search" to "Metrically aware text search" ?
+
+---
+Phenomenal! Could you write a short user's guide to this app?
