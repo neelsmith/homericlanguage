@@ -13,6 +13,10 @@ Although not yet in release status, the following apps are already usable:
 - `apps/metricsearch.html`: search  an *Iliad* text with optional metrical constraints
 
 
+There are also vibe-coded user's guides for each app:
+
+- `apps/guide-viewer.md`: user's guide for metrically aware reader
+- `apps/guide-search.md`: user's guide for metrically aware search app
 
 ## Source for scansion
 
