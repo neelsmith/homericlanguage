@@ -3,10 +3,20 @@
 > *Work in progress: not ready for release.*
 
 
+## Note
+
+The Homer Multitext project archive currently includes editions of the *Iliad* for the following manuscript sources:
+
+
+- Venetus A (Marciana 454 = 822; siglum `msA`): books 1-24.
+- Venetus B (Marciana 453 = 821; siglum `msB`): book 9
+- Escorial, Upsilon 1.1 (siglum `e3`): books 8, 9, 10
+
+
 
 ## Datasets
 
-For each of the *Iliad*s in the Homer Multitext project archive, we create:
+For each of the *Iliad*s in the Homer Multitext project archive, I create:
 
 - a corpus of citable tokens
 - a corpus of citable syllables, defined phonetically
