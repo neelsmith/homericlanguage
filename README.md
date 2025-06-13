@@ -6,6 +6,9 @@
 
 ## Vibe-coded apps
 
+
+Although not yet in release status, the following apps are already usable:
+
 - `apps/metricreader.html`: read an *Iliad* text with full metrical analysis
 - `apps/metricsearch.html`: search  an *Iliad* text with optional metrical constraints
 
