@@ -1,0 +1,765 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+        body { font-family: sans-serif; margin: 20px; }
+        .main-container { display: flex; gap: 20px; }
+        .search-content-area { flex: 3; min-width: 0; }
+        .info-panel-area { 
+            flex: 1; padding: 15px; border: 1px solid #b0c4de; background-color: #f0f8ff; 
+            font-size: 0.9em; color: #333; border-radius: 4px; min-height: 100px; 
+            max-height: 80vh; overflow-y: auto; align-self: flex-start;
+        }
+        .control-group { margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .control-group label { min-width: 120px; /* Increased for longer label */ text-align: right; margin-right: 5px;}
+        #search-input { width: 300px; padding: 8px; font-size: 1em; }
+        #search-mode-select { padding: 8px; font-size: 1em; }
+        #foot-syllable-input { width: 100px; padding: 8px; font-size: 1em; }
+        #search-button { padding: 8px 15px; font-size: 1em; cursor: pointer; margin-left: 135px; /* Align with inputs */}
+        
+        #results-area { margin-top: 20px; }
+        .result-item { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed #ccc; }
+        .result-item:last-child { border-bottom: none; }
+        .result-passage-ref { color: silver; font-weight: bold; margin-right: 8px; font-size: 0.9em; display: inline-block;}
+        .result-syllables pre {
+            background-color: #f9f9f9; padding: 10px; border-radius: 4px; 
+            white-space: pre-wrap; word-wrap: break-word; line-height: 1.8; 
+            display: inline-block; width: calc(100% - 70px); 
+            vertical-align: top; margin-top: 0; font-family: monospace; 
+        }
+        #pagination-controls { margin-top: 20px; text-align: center; }
+        #pagination-controls button { padding: 5px 10px; margin: 0 5px; cursor: pointer; }
+        #page-info { margin: 0 10px; display: inline-block; }
+        .status, .info { margin-bottom: 10px; min-height: 1.2em; }
+        .error { color: red; font-weight: bold; }
+        .status-loading { color: blue; }
+        .status-results { color: green; }
+        .syllable-display-span { display: inline-block; padding: 2px 4px; margin: 1px 0; border-radius: 3px; line-height: 1.4; vertical-align: middle;}
+        .clickable-syllable-search { cursor: pointer;}
+        .clickable-syllable-search:hover { outline: 1px solid #007bff; box-shadow: 0 0 3px rgba(0,123,255,0.5);}
+        .syllable-long { background-color: #cccccc; color: #000; }
+        .syllable-short { background-color: #eeeeee; color: #333; }
+        .syllable-anceps { background-color: #ffcc80; color: #573a08; }
+        .syllable-unknown { background-color: #f0f0f0; border: 1px dashed #ccc; }
+        .half-line-marker { font-size: 1.3em; font-weight: bold; color: #555; padding: 0 5px; vertical-align: middle; }
+        .search-match-highlight { background-color: yellow !important; color: black !important; }
+    
+
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iliad Text Search</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .main-container { display: flex; gap: 20px; }
+        .search-content-area { flex: 3; min-width: 0; }
+        .info-panel-area { 
+            flex: 1; padding: 15px; border: 1px solid #b0c4de; background-color: #f0f8ff; 
+            font-size: 0.9em; color: #333; border-radius: 4px; min-height: 100px; 
+            max-height: 80vh; overflow-y: auto; align-self: flex-start;
+        }
+        .control-group { margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .control-group label { min-width: 120px; /* Increased for longer label */ text-align: right; margin-right: 5px;}
+        #search-input { width: 300px; padding: 8px; font-size: 1em; }
+        #search-mode-select { padding: 8px; font-size: 1em; }
+        #foot-syllable-input { width: 100px; padding: 8px; font-size: 1em; }
+        #search-button { padding: 8px 15px; font-size: 1em; cursor: pointer; margin-left: 135px; /* Align with inputs */}
+        
+        #results-area { margin-top: 20px; }
+        .result-item { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed #ccc; }
+        .result-item:last-child { border-bottom: none; }
+        .result-passage-ref { color: silver; font-weight: bold; margin-right: 8px; font-size: 0.9em; display: inline-block;}
+        .result-syllables pre {
+            background-color: #f9f9f9; padding: 10px; border-radius: 4px; 
+            white-space: pre-wrap; word-wrap: break-word; line-height: 1.8; 
+            display: inline-block; width: calc(100% - 70px); 
+            vertical-align: top; margin-top: 0; font-family: monospace; 
+        }
+        #pagination-controls { margin-top: 20px; text-align: center; }
+        #pagination-controls button { padding: 5px 10px; margin: 0 5px; cursor: pointer; }
+        #page-info { margin: 0 10px; display: inline-block; }
+        .status, .info { margin-bottom: 10px; min-height: 1.2em; }
+        .error { color: red; font-weight: bold; }
+        .status-loading { color: blue; }
+        .status-results { color: green; }
+        .syllable-display-span { display: inline-block; padding: 2px 4px; margin: 1px 0; border-radius: 3px; line-height: 1.4; vertical-align: middle;}
+        .clickable-syllable-search { cursor: pointer;}
+        .clickable-syllable-search:hover { outline: 1px solid #007bff; box-shadow: 0 0 3px rgba(0,123,255,0.5);}
+        .syllable-long { background-color: #cccccc; color: #000; }
+        .syllable-short { background-color: #eeeeee; color: #333; }
+        .syllable-anceps { background-color: #ffcc80; color: #573a08; }
+        .syllable-unknown { background-color: #f0f0f0; border: 1px dashed #ccc; }
+        .half-line-marker { font-size: 1.3em; font-weight: bold; color: #555; padding: 0 5px; vertical-align: middle; }
+        .search-match-highlight { background-color: yellow !important; color: black !important; }
+    </style>
+</head>
+<body>
+    <h1>Iliad Text Search</h1>
+    <div class="main-container">
+        <div class="search-content-area">
+            <div class="control-group">
+                <label for="search-input">Search Text:</label>
+                <input type="text" id="search-input" placeholder="Enter Greek text (simplified)...">
+            </div>
+            <div class="control-group">
+                <label for="search-mode-select">Search Mode:</label>
+                <select id="search-mode-select">
+                    <option value="contains">Contains (anywhere)</option>
+                    <option value="starts_from">Starts from constraint</option>
+                    <option value="ends_at">Ends at constraint</option>
+                    <option value="follows">Follows constraint</option>
+                    <option value="precedes">Precedes constraint</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="foot-syllable-input">Foot.Syllable Constraint:</label>
+                <input type="text" id="foot-syllable-input" placeholder="e.g., 1.1 (optional)">
+            </div>
+            <div class="control-group">
+                <button id="search-button">Search</button>
+            </div>
+            <div id="status-message" class="status"></div>
+            <div id="results-area"></div>
+            <div id="pagination-controls" style="display: none;">
+                <button id="prev-page-button" disabled>&laquo; Previous</button>
+                <span id="page-info"></span>
+                <button id="next-page-button" disabled>Next &raquo;</button>
+            </div>
+        </div>
+        <div class="info-panel-area" id="info-display-search"></div>
+    </div>
+
+    <script>
+        const DATA_URL = 'https://raw.githubusercontent.com/neelsmith/homericlanguage/refs/heads/main/scansion-expanded.cex';
+        const RESULTS_PER_PAGE = 10;
+        let linesData = {};
+        let currentSearchResults = [], currentPage = 1;
+
+        const searchInput = document.getElementById('search-input');
+        const searchModeSelect = document.getElementById('search-mode-select'); // New select
+        const footSyllableInput = document.getElementById('foot-syllable-input');
+        const searchButton = document.getElementById('search-button');
+        const statusMessageDiv = document.getElementById('status-message');
+        const resultsAreaDiv = document.getElementById('results-area');
+        const infoDisplaySearch = document.getElementById('info-display-search');
+        const paginationControlsDiv = document.getElementById('pagination-controls');
+        const prevPageButton = document.getElementById('prev-page-button');
+        const nextPageButton = document.getElementById('next-page-button');
+        const pageInfoSpan = document.getElementById('page-info');
+        const PLACEHOLDER_INFO_TEXT_SEARCH = 'Click on a syllable in the results for details.';
+
+        function simplifyGreek(text) { /* ... (same) ... */ return text ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[,’'.·]/g, "") : "";}
+
+        async function fetchDataAndPreprocess() {
+            statusMessageDiv.textContent = 'Loading and preparing data...';
+            infoDisplaySearch.textContent = "Loading data...";
+            [searchButton, searchInput, footSyllableInput, searchModeSelect].forEach(el => el.disabled = true);
+            try {
+                const response = await fetch(DATA_URL);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const textData = await response.text();
+                const allFileLines = textData.trim().split('\n').slice(1).filter(line => line.trim() !== '');
+                const columnNames = ['Passage', 'Syllable', 'SyllableText', 'MetricLength', 'Token', 'Half-line'];
+                const parsedData = allFileLines.map(line => {
+                    const values = line.split('|');
+                    const record = {};
+                    columnNames.forEach((colName, index) => {
+                        record[colName] = (colName === 'Half-line') ? parseInt(values[index], 10) : values[index];
+                    });
+                    return record;
+                });
+                const tempLines = {};
+                parsedData.forEach(record => {
+                    if (!tempLines[record.Passage]) tempLines[record.Passage] = { records: [] };
+                    tempLines[record.Passage].records.push(record);
+                });
+                for (const passageUrn in tempLines) {
+                    linesData[passageUrn] = { records: tempLines[passageUrn].records };
+                }
+                statusMessageDiv.textContent = `Data ready. ${Object.keys(linesData).length} lines processed.`;
+                infoDisplaySearch.textContent = PLACEHOLDER_INFO_TEXT_SEARCH;
+                [searchButton, searchInput, footSyllableInput, searchModeSelect].forEach(el => el.disabled = false);
+            } catch (error) {
+                console.error('Error:', error); statusMessageDiv.innerHTML = `<span class="error">Error: ${error.message}.</span>`;
+                infoDisplaySearch.textContent = 'Could not load data.';
+            }
+        }
+        
+        function getPassageComponentFromUrn(urnString) {return urnString ? urnString.split(':').pop() || '' : '';}
+        function getFootSyllableFromSyllablePassage(syllablePassageComponent) {
+            if (!syllablePassageComponent) return null;
+            const parts = syllablePassageComponent.split('.');
+            return (parts.length >= 4) ? { foot: parts[2], syllable: parts[3] } : null;
+        }
+
+        function formatSyllablesForDisplay(lineRecords, highlightStartIndex = -1, highlightEndIndex = -1) { 
+            // ... (same as previous, no changes needed here for the modes, only for highlighting)
+            let syllablesHtmlOutput = "", previousToken = null, halfLineMarkerAdded = false; 
+            lineRecords.forEach((record, index) => {
+                let prefix = ""; 
+                if (record['Half-line'] === 2 && !halfLineMarkerAdded) {
+                    prefix += `<span class="half-line-marker">∥</span> `; halfLineMarkerAdded = true;
+                }
+                if (index === 0) syllablesHtmlOutput += prefix; 
+                else {
+                    syllablesHtmlOutput += (record.Token !== previousToken) ? " " : "-";
+                    syllablesHtmlOutput += prefix; 
+                }
+                let syllableClass = 'syllable-unknown'; 
+                switch (record.MetricLength.toLowerCase()) { 
+                    case 'long': syllableClass = 'syllable-long'; break;
+                    case 'short': syllableClass = 'syllable-short'; break;
+                    case 'anceps': syllableClass = 'syllable-anceps'; break;
+                }
+                if (index >= highlightStartIndex && index <= highlightEndIndex) {
+                    syllableClass += ' search-match-highlight';
+                }
+                const safeSyllableText = record.SyllableText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                syllablesHtmlOutput += `<span class="syllable-display-span clickable-syllable-search ${syllableClass}" data-syllable-urn="${record.Syllable}" data-metric-length="${record.MetricLength}">${safeSyllableText}</span>`;
+                previousToken = record.Token;
+            });
+            return syllablesHtmlOutput; 
+        }
+        
+        // Helper to build simplified text from a slice of records
+        function buildSimplifiedTextFromRecords(recordsSlice) {
+            let text = "";
+            let prevToken = null;
+            recordsSlice.forEach((record, idx) => {
+                if (idx > 0 && record.Token !== prevToken) {
+                    text += " ";
+                }
+                text += simplifyGreek(record.SyllableText);
+                prevToken = record.Token;
+            });
+            return text;
+        }
+
+
+        function performSearch() {
+            const query = searchInput.value.trim();
+            const searchMode = searchModeSelect.value;
+            const constraintStr = footSyllableInput.value.trim();
+            
+            if (!query) { /* ... (error handling as before) ... */ return; }
+
+            let constraintFoot = null, constraintSyllableInFoot = null;
+            if (constraintStr) {
+                const parts = constraintStr.split('.');
+                if (parts.length === 2 && /^\d+$/.test(parts[0]) && /^\d+$/.test(parts[1])) {
+                    constraintFoot = parts[0]; constraintSyllableInFoot = parts[1];
+                } else if (searchMode !== 'contains') { // 'contains' mode can ignore invalid constraint
+                    statusMessageDiv.textContent = 'Invalid Foot.Syllable (e.g., 1.1).'; statusMessageDiv.className = 'status error';
+                    currentSearchResults = []; renderResultsPage(); updatePaginationControls(); return;
+                }
+            } else if (searchMode !== 'contains') { // Modes other than 'contains' need a constraint
+                 statusMessageDiv.textContent = 'Please provide a Foot.Syllable constraint for this search mode.'; 
+                 statusMessageDiv.className = 'status error'; currentSearchResults = []; renderResultsPage(); updatePaginationControls(); return;
+            }
+
+
+            statusMessageDiv.textContent = 'Searching...'; statusMessageDiv.className = 'status status-loading';
+            const simplifiedQuery = simplifyGreek(query);
+            currentSearchResults = [];
+
+            for (const passageUrn in linesData) {
+                const lineEntry = linesData[passageUrn];
+                const lineRecords = lineEntry.records;
+                let targetRecordIndex = -1; // Index of the constrained syllable in lineRecords
+
+                if (constraintFoot && constraintSyllableInFoot) {
+                    for (let i = 0; i < lineRecords.length; i++) {
+                        const recSyllPassComp = lineRecords[i].Syllable.split(':').pop();
+                        const fs = getFootSyllableFromSyllablePassage(recSyllPassComp);
+                        if (fs && fs.foot === constraintFoot && fs.syllable === constraintSyllableInFoot) {
+                            targetRecordIndex = i;
+                            break;
+                        }
+                    }
+                    if (targetRecordIndex === -1 && searchMode !== 'contains') { 
+                        continue; // Constraint syllable not found in this line, skip if mode requires it
+                    }
+                }
+
+                let matchStartIndex = -1, matchEndIndex = -1;
+
+                if (searchMode === 'starts_from') {
+                    if (targetRecordIndex === -1) continue;
+                    const textFromConstraint = buildSimplifiedTextFromRecords(lineRecords.slice(targetRecordIndex));
+                    if (textFromConstraint.startsWith(simplifiedQuery)) {
+                        // Find end of match
+                        let currentMatchText = "";
+                        for (let k = 0; k < (lineRecords.length - targetRecordIndex); k++) {
+                            currentMatchText = buildSimplifiedTextFromRecords(lineRecords.slice(targetRecordIndex, targetRecordIndex + k + 1));
+                            if (currentMatchText === simplifiedQuery) {
+                                matchStartIndex = targetRecordIndex;
+                                matchEndIndex = targetRecordIndex + k;
+                                break;
+                            }
+                            if (currentMatchText.length > simplifiedQuery.length && !currentMatchText.startsWith(simplifiedQuery) ) break;
+                        }
+                    }
+                } else if (searchMode === 'ends_at') {
+                    if (targetRecordIndex === -1) continue;
+                    for (let i = 0; i <= targetRecordIndex; i++) { // Potential start of match
+                        const segment = lineRecords.slice(i, targetRecordIndex + 1);
+                        const textOfSegment = buildSimplifiedTextFromRecords(segment);
+                        if (textOfSegment === simplifiedQuery) {
+                            matchStartIndex = i;
+                            matchEndIndex = targetRecordIndex;
+                            break; 
+                        }
+                    }
+                } else if (searchMode === 'follows') {
+                    const iterationStart = (targetRecordIndex !== -1) ? targetRecordIndex : 0;
+                    for (let i = iterationStart; i < lineRecords.length; i++) { // Potential start of match
+                        for (let j = i; j < lineRecords.length; j++) { // Potential end of match
+                            const segment = lineRecords.slice(i, j + 1);
+                            const textOfSegment = buildSimplifiedTextFromRecords(segment);
+                            if (textOfSegment === simplifiedQuery) {
+                                matchStartIndex = i; matchEndIndex = j; break;
+                            }
+                            if (textOfSegment.length >= simplifiedQuery.length && !textOfSegment.startsWith(simplifiedQuery)) break; 
+                        }
+                        if (matchStartIndex !== -1) break; // Found first occurrence
+                    }
+                } else if (searchMode === 'precedes') {
+                    const iterationEnd = (targetRecordIndex !== -1) ? targetRecordIndex : lineRecords.length - 1;
+                    // Find last occurrence
+                    for (let j = iterationEnd; j >= 0; j--) { // Potential end of match
+                        for (let i = 0; i <= j; i++) { // Potential start of match
+                             const segment = lineRecords.slice(i, j + 1);
+                             const textOfSegment = buildSimplifiedTextFromRecords(segment);
+                             if (textOfSegment === simplifiedQuery) {
+                                 matchStartIndex = i; matchEndIndex = j; break; 
+                             }
+                        }
+                        if (matchStartIndex !== -1) break; // Found last occurrence
+                    }
+                } else { // 'contains' (default unconstrained)
+                     for (let i = 0; i < lineRecords.length; i++) { 
+                        for (let j = i; j < lineRecords.length; j++) { 
+                            const segment = lineRecords.slice(i, j + 1);
+                            const textOfSegment = buildSimplifiedTextFromRecords(segment);
+                            if (textOfSegment === simplifiedQuery) {
+                                matchStartIndex = i; matchEndIndex = j; break;
+                            }
+                             if (textOfSegment.length >= simplifiedQuery.length && !textOfSegment.startsWith(simplifiedQuery) && !simplifiedQuery.startsWith(textOfSegment)) {
+                                // If textOfSegment grew larger than query and isn't a prefix, OR
+                                // if query is larger and textOfSegment isn't its prefix, then this 'j' path is dead.
+                                // This helps break inner loop earlier for long lines if current segment is too short.
+                                if (textOfSegment.length > simplifiedQuery.length) break;
+                            }
+                        }
+                        if (matchStartIndex !== -1) break; 
+                    }
+                }
+
+                if (matchStartIndex !== -1 && matchEndIndex !== -1) {
+                    currentSearchResults.push({ 
+                        passageUrn: passageUrn, 
+                        matchStartIndex: matchStartIndex, 
+                        matchEndIndex: matchEndIndex
+                    });
+                }
+            } 
+
+            currentPage = 1; renderResultsPage(); updatePaginationControls();
+            statusMessageDiv.textContent = `${currentSearchResults.length} result(s) found.`;
+            statusMessageDiv.className = (currentSearchResults.length > 0) ? 'status status-results' : 'status info';
+            infoDisplaySearch.textContent = PLACEHOLDER_INFO_TEXT_SEARCH;
+        }
+
+
+        function renderResultsPage() { /* ... (same) ... */ }
+        function updatePaginationControls() { /* ... (same) ... */ }
+        function handleCheckboxChange() { /* ... (same - though likely not used in this app) ... */ }
+
+        // --- Event Listeners ---
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') performSearch(); });
+        footSyllableInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') performSearch(); });
+        searchModeSelect.addEventListener('change', () => { // Optional: clear constraint if mode doesn't need it
+            if (searchModeSelect.value === 'contains') {
+                // footSyllableInput.value = ''; // Or just let user manage it
+            }
+        });
+        prevPageButton.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderResultsPage(); updatePaginationControls(); } });
+        nextPageButton.addEventListener('click', () => { const totalPages = Math.ceil(currentSearchResults.length / RESULTS_PER_PAGE); if (currentPage < totalPages) { currentPage++; renderResultsPage(); updatePaginationControls(); } });
+        
+        resultsAreaDiv.addEventListener('click', function(event) {
+            const syllableSpan = event.target.closest('.clickable-syllable-search');
+            if (syllableSpan) {
+                const syllableUrn = syllableSpan.dataset.syllableUrn;
+                const metricLength = syllableSpan.dataset.metricLength;
+                const syllableText = syllableSpan.textContent;
+                if (syllableUrn) {
+                    const passageComponent = getPassageComponentFromUrn(syllableUrn); 
+                    const fs = getFootSyllableFromSyllablePassage(passageComponent);
+                    let infoText = `Syllable: ${syllableText}`;
+                    if (fs) infoText += ` | Foot-syllable: ${fs.foot}.${fs.syllable}`;
+                    if (metricLength) infoText += ` | Length: ${metricLength.charAt(0).toUpperCase() + metricLength.slice(1)}`;
+                    infoDisplaySearch.textContent = infoText;
+                } else infoDisplaySearch.textContent = 'Syllable has no URN data.';
+            }
+        });
+        document.addEventListener('DOMContentLoaded', fetchDataAndPreprocess);
+
+        // Minimal implementations for renderResultsPage and updatePaginationControls (same as before)
+        function renderResultsPage() {
+            resultsAreaDiv.innerHTML = '';
+            if (currentSearchResults.length === 0) { paginationControlsDiv.style.display = 'none'; return; }
+            const startIndex = (currentPage - 1) * RESULTS_PER_PAGE;
+            const endIndex = startIndex + RESULTS_PER_PAGE;
+            const pageResults = currentSearchResults.slice(startIndex, endIndex);
+            pageResults.forEach(result => {
+                const passageUrn = result.passageUrn;
+                const lineData = linesData[passageUrn];
+                if (!lineData) return;
+                const resultItemDiv = document.createElement('div');
+                resultItemDiv.className = 'result-item';
+                const passageRef = passageUrn.split(':').pop();
+                const syllablesHtml = formatSyllablesForDisplay(lineData.records, result.matchStartIndex, result.matchEndIndex);
+                resultItemDiv.innerHTML = `<div><span class="result-passage-ref">${passageRef}</span><div class="result-syllables"><pre>${syllablesHtml}</pre></div></div>`;
+                resultsAreaDiv.appendChild(resultItemDiv);
+            });
+        }
+        function updatePaginationControls() {
+            if (currentSearchResults.length === 0) { paginationControlsDiv.style.display = 'none'; return; }
+            const totalPages = Math.ceil(currentSearchResults.length / RESULTS_PER_PAGE);
+            pageInfoSpan.textContent = `Page ${currentPage} of ${totalPages}`;
+            prevPageButton.disabled = currentPage === 1;
+            nextPageButton.disabled = currentPage === totalPages || totalPages === 0;
+            paginationControlsDiv.style.display = totalPages > 0 ? 'block' : 'none';
+        }
+
+    </script>
+</body>
+</html>
+
+
+
+							<script>
+                            	
+        const DATA_URL = 'https://raw.githubusercontent.com/neelsmith/homericlanguage/refs/heads/main/scansion-expanded.cex';
+        const RESULTS_PER_PAGE = 10;
+        let linesData = {};
+        let currentSearchResults = [], currentPage = 1;
+
+        const searchInput = document.getElementById('search-input');
+        const searchModeSelect = document.getElementById('search-mode-select'); // New select
+        const footSyllableInput = document.getElementById('foot-syllable-input');
+        const searchButton = document.getElementById('search-button');
+        const statusMessageDiv = document.getElementById('status-message');
+        const resultsAreaDiv = document.getElementById('results-area');
+        const infoDisplaySearch = document.getElementById('info-display-search');
+        const paginationControlsDiv = document.getElementById('pagination-controls');
+        const prevPageButton = document.getElementById('prev-page-button');
+        const nextPageButton = document.getElementById('next-page-button');
+        const pageInfoSpan = document.getElementById('page-info');
+        const PLACEHOLDER_INFO_TEXT_SEARCH = 'Click on a syllable in the results for details.';
+
+        function simplifyGreek(text) { /* ... (same) ... */ return text ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[,’'.·]/g, "") : "";}
+
+        async function fetchDataAndPreprocess() {
+            statusMessageDiv.textContent = 'Loading and preparing data...';
+            infoDisplaySearch.textContent = "Loading data...";
+            [searchButton, searchInput, footSyllableInput, searchModeSelect].forEach(el => el.disabled = true);
+            try {
+                const response = await fetch(DATA_URL);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const textData = await response.text();
+                const allFileLines = textData.trim().split('\n').slice(1).filter(line => line.trim() !== '');
+                const columnNames = ['Passage', 'Syllable', 'SyllableText', 'MetricLength', 'Token', 'Half-line'];
+                const parsedData = allFileLines.map(line => {
+                    const values = line.split('|');
+                    const record = {};
+                    columnNames.forEach((colName, index) => {
+                        record[colName] = (colName === 'Half-line') ? parseInt(values[index], 10) : values[index];
+                    });
+                    return record;
+                });
+                const tempLines = {};
+                parsedData.forEach(record => {
+                    if (!tempLines[record.Passage]) tempLines[record.Passage] = { records: [] };
+                    tempLines[record.Passage].records.push(record);
+                });
+                for (const passageUrn in tempLines) {
+                    linesData[passageUrn] = { records: tempLines[passageUrn].records };
+                }
+                statusMessageDiv.textContent = `Data ready. ${Object.keys(linesData).length} lines processed.`;
+                infoDisplaySearch.textContent = PLACEHOLDER_INFO_TEXT_SEARCH;
+                [searchButton, searchInput, footSyllableInput, searchModeSelect].forEach(el => el.disabled = false);
+            } catch (error) {
+                console.error('Error:', error); statusMessageDiv.innerHTML = `<span class="error">Error: ${error.message}.</span>`;
+                infoDisplaySearch.textContent = 'Could not load data.';
+            }
+        }
+        
+        function getPassageComponentFromUrn(urnString) {return urnString ? urnString.split(':').pop() || '' : '';}
+        function getFootSyllableFromSyllablePassage(syllablePassageComponent) {
+            if (!syllablePassageComponent) return null;
+            const parts = syllablePassageComponent.split('.');
+            return (parts.length >= 4) ? { foot: parts[2], syllable: parts[3] } : null;
+        }
+
+        function formatSyllablesForDisplay(lineRecords, highlightStartIndex = -1, highlightEndIndex = -1) { 
+            // ... (same as previous, no changes needed here for the modes, only for highlighting)
+            let syllablesHtmlOutput = "", previousToken = null, halfLineMarkerAdded = false; 
+            lineRecords.forEach((record, index) => {
+                let prefix = ""; 
+                if (record['Half-line'] === 2 && !halfLineMarkerAdded) {
+                    prefix += `<span class="half-line-marker">∥</span> `; halfLineMarkerAdded = true;
+                }
+                if (index === 0) syllablesHtmlOutput += prefix; 
+                else {
+                    syllablesHtmlOutput += (record.Token !== previousToken) ? " " : "-";
+                    syllablesHtmlOutput += prefix; 
+                }
+                let syllableClass = 'syllable-unknown'; 
+                switch (record.MetricLength.toLowerCase()) { 
+                    case 'long': syllableClass = 'syllable-long'; break;
+                    case 'short': syllableClass = 'syllable-short'; break;
+                    case 'anceps': syllableClass = 'syllable-anceps'; break;
+                }
+                if (index >= highlightStartIndex && index <= highlightEndIndex) {
+                    syllableClass += ' search-match-highlight';
+                }
+                const safeSyllableText = record.SyllableText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                syllablesHtmlOutput += `<span class="syllable-display-span clickable-syllable-search ${syllableClass}" data-syllable-urn="${record.Syllable}" data-metric-length="${record.MetricLength}">${safeSyllableText}</span>`;
+                previousToken = record.Token;
+            });
+            return syllablesHtmlOutput; 
+        }
+        
+        // Helper to build simplified text from a slice of records
+        function buildSimplifiedTextFromRecords(recordsSlice) {
+            let text = "";
+            let prevToken = null;
+            recordsSlice.forEach((record, idx) => {
+                if (idx > 0 && record.Token !== prevToken) {
+                    text += " ";
+                }
+                text += simplifyGreek(record.SyllableText);
+                prevToken = record.Token;
+            });
+            return text;
+        }
+
+
+        function performSearch() {
+            const query = searchInput.value.trim();
+            const searchMode = searchModeSelect.value;
+            const constraintStr = footSyllableInput.value.trim();
+            
+            if (!query) { /* ... (error handling as before) ... */ return; }
+
+            let constraintFoot = null, constraintSyllableInFoot = null;
+            if (constraintStr) {
+                const parts = constraintStr.split('.');
+                if (parts.length === 2 && /^\d+$/.test(parts[0]) && /^\d+$/.test(parts[1])) {
+                    constraintFoot = parts[0]; constraintSyllableInFoot = parts[1];
+                } else if (searchMode !== 'contains') { // 'contains' mode can ignore invalid constraint
+                    statusMessageDiv.textContent = 'Invalid Foot.Syllable (e.g., 1.1).'; statusMessageDiv.className = 'status error';
+                    currentSearchResults = []; renderResultsPage(); updatePaginationControls(); return;
+                }
+            } else if (searchMode !== 'contains') { // Modes other than 'contains' need a constraint
+                 statusMessageDiv.textContent = 'Please provide a Foot.Syllable constraint for this search mode.'; 
+                 statusMessageDiv.className = 'status error'; currentSearchResults = []; renderResultsPage(); updatePaginationControls(); return;
+            }
+
+
+            statusMessageDiv.textContent = 'Searching...'; statusMessageDiv.className = 'status status-loading';
+            const simplifiedQuery = simplifyGreek(query);
+            currentSearchResults = [];
+
+            for (const passageUrn in linesData) {
+                const lineEntry = linesData[passageUrn];
+                const lineRecords = lineEntry.records;
+                let targetRecordIndex = -1; // Index of the constrained syllable in lineRecords
+
+                if (constraintFoot && constraintSyllableInFoot) {
+                    for (let i = 0; i < lineRecords.length; i++) {
+                        const recSyllPassComp = lineRecords[i].Syllable.split(':').pop();
+                        const fs = getFootSyllableFromSyllablePassage(recSyllPassComp);
+                        if (fs && fs.foot === constraintFoot && fs.syllable === constraintSyllableInFoot) {
+                            targetRecordIndex = i;
+                            break;
+                        }
+                    }
+                    if (targetRecordIndex === -1 && searchMode !== 'contains') { 
+                        continue; // Constraint syllable not found in this line, skip if mode requires it
+                    }
+                }
+
+                let matchStartIndex = -1, matchEndIndex = -1;
+
+                if (searchMode === 'starts_from') {
+                    if (targetRecordIndex === -1) continue;
+                    const textFromConstraint = buildSimplifiedTextFromRecords(lineRecords.slice(targetRecordIndex));
+                    if (textFromConstraint.startsWith(simplifiedQuery)) {
+                        // Find end of match
+                        let currentMatchText = "";
+                        for (let k = 0; k < (lineRecords.length - targetRecordIndex); k++) {
+                            currentMatchText = buildSimplifiedTextFromRecords(lineRecords.slice(targetRecordIndex, targetRecordIndex + k + 1));
+                            if (currentMatchText === simplifiedQuery) {
+                                matchStartIndex = targetRecordIndex;
+                                matchEndIndex = targetRecordIndex + k;
+                                break;
+                            }
+                            if (currentMatchText.length > simplifiedQuery.length && !currentMatchText.startsWith(simplifiedQuery) ) break;
+                        }
+                    }
+                } else if (searchMode === 'ends_at') {
+                    if (targetRecordIndex === -1) continue;
+                    for (let i = 0; i <= targetRecordIndex; i++) { // Potential start of match
+                        const segment = lineRecords.slice(i, targetRecordIndex + 1);
+                        const textOfSegment = buildSimplifiedTextFromRecords(segment);
+                        if (textOfSegment === simplifiedQuery) {
+                            matchStartIndex = i;
+                            matchEndIndex = targetRecordIndex;
+                            break; 
+                        }
+                    }
+                } else if (searchMode === 'follows') {
+                    const iterationStart = (targetRecordIndex !== -1) ? targetRecordIndex : 0;
+                    for (let i = iterationStart; i < lineRecords.length; i++) { // Potential start of match
+                        for (let j = i; j < lineRecords.length; j++) { // Potential end of match
+                            const segment = lineRecords.slice(i, j + 1);
+                            const textOfSegment = buildSimplifiedTextFromRecords(segment);
+                            if (textOfSegment === simplifiedQuery) {
+                                matchStartIndex = i; matchEndIndex = j; break;
+                            }
+                            if (textOfSegment.length >= simplifiedQuery.length && !textOfSegment.startsWith(simplifiedQuery)) break; 
+                        }
+                        if (matchStartIndex !== -1) break; // Found first occurrence
+                    }
+                } else if (searchMode === 'precedes') {
+                    const iterationEnd = (targetRecordIndex !== -1) ? targetRecordIndex : lineRecords.length - 1;
+                    // Find last occurrence
+                    for (let j = iterationEnd; j >= 0; j--) { // Potential end of match
+                        for (let i = 0; i <= j; i++) { // Potential start of match
+                             const segment = lineRecords.slice(i, j + 1);
+                             const textOfSegment = buildSimplifiedTextFromRecords(segment);
+                             if (textOfSegment === simplifiedQuery) {
+                                 matchStartIndex = i; matchEndIndex = j; break; 
+                             }
+                        }
+                        if (matchStartIndex !== -1) break; // Found last occurrence
+                    }
+                } else { // 'contains' (default unconstrained)
+                     for (let i = 0; i < lineRecords.length; i++) { 
+                        for (let j = i; j < lineRecords.length; j++) { 
+                            const segment = lineRecords.slice(i, j + 1);
+                            const textOfSegment = buildSimplifiedTextFromRecords(segment);
+                            if (textOfSegment === simplifiedQuery) {
+                                matchStartIndex = i; matchEndIndex = j; break;
+                            }
+                             if (textOfSegment.length >= simplifiedQuery.length && !textOfSegment.startsWith(simplifiedQuery) && !simplifiedQuery.startsWith(textOfSegment)) {
+                                // If textOfSegment grew larger than query and isn't a prefix, OR
+                                // if query is larger and textOfSegment isn't its prefix, then this 'j' path is dead.
+                                // This helps break inner loop earlier for long lines if current segment is too short.
+                                if (textOfSegment.length > simplifiedQuery.length) break;
+                            }
+                        }
+                        if (matchStartIndex !== -1) break; 
+                    }
+                }
+
+                if (matchStartIndex !== -1 && matchEndIndex !== -1) {
+                    currentSearchResults.push({ 
+                        passageUrn: passageUrn, 
+                        matchStartIndex: matchStartIndex, 
+                        matchEndIndex: matchEndIndex
+                    });
+                }
+            } 
+
+            currentPage = 1; renderResultsPage(); updatePaginationControls();
+            statusMessageDiv.textContent = `${currentSearchResults.length} result(s) found.`;
+            statusMessageDiv.className = (currentSearchResults.length > 0) ? 'status status-results' : 'status info';
+            infoDisplaySearch.textContent = PLACEHOLDER_INFO_TEXT_SEARCH;
+        }
+
+
+        function renderResultsPage() { /* ... (same) ... */ }
+        function updatePaginationControls() { /* ... (same) ... */ }
+        function handleCheckboxChange() { /* ... (same - though likely not used in this app) ... */ }
+
+        // --- Event Listeners ---
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') performSearch(); });
+        footSyllableInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') performSearch(); });
+        searchModeSelect.addEventListener('change', () => { // Optional: clear constraint if mode doesn't need it
+            if (searchModeSelect.value === 'contains') {
+                // footSyllableInput.value = ''; // Or just let user manage it
+            }
+        });
+        prevPageButton.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderResultsPage(); updatePaginationControls(); } });
+        nextPageButton.addEventListener('click', () => { const totalPages = Math.ceil(currentSearchResults.length / RESULTS_PER_PAGE); if (currentPage < totalPages) { currentPage++; renderResultsPage(); updatePaginationControls(); } });
+        
+        resultsAreaDiv.addEventListener('click', function(event) {
+            const syllableSpan = event.target.closest('.clickable-syllable-search');
+            if (syllableSpan) {
+                const syllableUrn = syllableSpan.dataset.syllableUrn;
+                const metricLength = syllableSpan.dataset.metricLength;
+                const syllableText = syllableSpan.textContent;
+                if (syllableUrn) {
+                    const passageComponent = getPassageComponentFromUrn(syllableUrn); 
+                    const fs = getFootSyllableFromSyllablePassage(passageComponent);
+                    let infoText = `Syllable: ${syllableText}`;
+                    if (fs) infoText += ` | Foot-syllable: ${fs.foot}.${fs.syllable}`;
+                    if (metricLength) infoText += ` | Length: ${metricLength.charAt(0).toUpperCase() + metricLength.slice(1)}`;
+                    infoDisplaySearch.textContent = infoText;
+                } else infoDisplaySearch.textContent = 'Syllable has no URN data.';
+            }
+        });
+        document.addEventListener('DOMContentLoaded', fetchDataAndPreprocess);
+
+        // Minimal implementations for renderResultsPage and updatePaginationControls (same as before)
+        function renderResultsPage() {
+            resultsAreaDiv.innerHTML = '';
+            if (currentSearchResults.length === 0) { paginationControlsDiv.style.display = 'none'; return; }
+            const startIndex = (currentPage - 1) * RESULTS_PER_PAGE;
+            const endIndex = startIndex + RESULTS_PER_PAGE;
+            const pageResults = currentSearchResults.slice(startIndex, endIndex);
+            pageResults.forEach(result => {
+                const passageUrn = result.passageUrn;
+                const lineData = linesData[passageUrn];
+                if (!lineData) return;
+                const resultItemDiv = document.createElement('div');
+                resultItemDiv.className = 'result-item';
+                const passageRef = passageUrn.split(':').pop();
+                const syllablesHtml = formatSyllablesForDisplay(lineData.records, result.matchStartIndex, result.matchEndIndex);
+                resultItemDiv.innerHTML = `<div><span class="result-passage-ref">${passageRef}</span><div class="result-syllables"><pre>${syllablesHtml}</pre></div></div>`;
+                resultsAreaDiv.appendChild(resultItemDiv);
+            });
+        }
+        function updatePaginationControls() {
+            if (currentSearchResults.length === 0) { paginationControlsDiv.style.display = 'none'; return; }
+            const totalPages = Math.ceil(currentSearchResults.length / RESULTS_PER_PAGE);
+            pageInfoSpan.textContent = `Page ${currentPage} of ${totalPages}`;
+            prevPageButton.disabled = currentPage === 1;
+            nextPageButton.disabled = currentPage === totalPages || totalPages === 0;
+            paginationControlsDiv.style.display = totalPages > 0 ? 'block' : 'none';
+        }
+
+    
+
+							</script>
+                        </body>
+                        </html>
+                    

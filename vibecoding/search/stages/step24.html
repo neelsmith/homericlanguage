@@ -1,0 +1,739 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+        body { font-family: sans-serif; margin: 20px; }
+        .main-container { display: flex; gap: 20px; } /* New wrapper for search-content and info-panel */
+        .search-content-area { flex: 3; min-width: 0; /* Important for flex items */ }
+        .info-panel-area { 
+            flex: 1; 
+            padding: 15px; 
+            border: 1px solid #b0c4de; 
+            background-color: #f0f8ff; 
+            font-size: 0.9em; 
+            color: #333; 
+            border-radius: 4px; 
+            min-height: 100px; 
+            max-height: 80vh; /* Limit height and allow scrolling if content is long */
+            overflow-y: auto;
+            align-self: flex-start; /* Don't stretch if content is short */
+        }
+
+
+        .control-group { margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .control-group label { min-width: 100px; }
+        #search-input { width: 300px; padding: 8px; font-size: 1em; }
+        #foot-syllable-input { width: 100px; padding: 8px; font-size: 1em; }
+        #search-button { padding: 8px 15px; font-size: 1em; cursor: pointer; }
+        
+        #results-area { margin-top: 20px; }
+        .result-item { 
+            margin-bottom: 20px; 
+            padding-bottom: 15px; 
+            border-bottom: 1px dashed #ccc; 
+        }
+        .result-item:last-child { border-bottom: none; }
+        
+        .result-passage-ref {
+            color: silver;
+            font-weight: bold;
+            margin-right: 8px;
+            font-size: 0.9em;
+            display: inline-block;
+        }
+        .result-syllables pre {
+            background-color: #f9f9f9; padding: 10px; border-radius: 4px; 
+            white-space: pre-wrap; word-wrap: break-word; line-height: 1.8; 
+            display: inline-block; width: calc(100% - 70px); 
+            vertical-align: top; margin-top: 0; 
+            font-family: monospace; 
+        }
+
+        #pagination-controls { margin-top: 20px; text-align: center; }
+        #pagination-controls button { padding: 5px 10px; margin: 0 5px; cursor: pointer; }
+        #page-info { margin: 0 10px; display: inline-block; }
+
+        .status, .info { margin-bottom: 10px; min-height: 1.2em; }
+        .error { color: red; font-weight: bold; }
+        .status-loading { color: blue; }
+        .status-results { color: green; }
+
+        .syllable-display-span { 
+            display: inline-block; padding: 2px 4px; margin: 1px 0;         
+            border-radius: 3px; line-height: 1.4; vertical-align: middle;
+        }
+        .clickable-syllable-search { /* Class for clickable syllables in search results */
+             cursor: pointer;
+        }
+        .clickable-syllable-search:hover {
+            outline: 1px solid #007bff; /* Similar to first app's syllable hover */
+            box-shadow: 0 0 3px rgba(0,123,255,0.5);
+        }
+
+        .syllable-long { background-color: #cccccc; color: #000; }
+        .syllable-short { background-color: #eeeeee; color: #333; }
+        .syllable-anceps { background-color: #ffcc80; color: #573a08; }
+        .syllable-unknown { background-color: #f0f0f0; border: 1px dashed #ccc; }
+        .half-line-marker { 
+            font-size: 1.3em; font-weight: bold; color: #555; 
+            padding: 0 5px; vertical-align: middle; 
+        }
+        .search-match-highlight { 
+            background-color: yellow !important; 
+            color: black !important; 
+        }
+    
+
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iliad Text Search</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .main-container { display: flex; gap: 20px; } /* New wrapper for search-content and info-panel */
+        .search-content-area { flex: 3; min-width: 0; /* Important for flex items */ }
+        .info-panel-area { 
+            flex: 1; 
+            padding: 15px; 
+            border: 1px solid #b0c4de; 
+            background-color: #f0f8ff; 
+            font-size: 0.9em; 
+            color: #333; 
+            border-radius: 4px; 
+            min-height: 100px; 
+            max-height: 80vh; /* Limit height and allow scrolling if content is long */
+            overflow-y: auto;
+            align-self: flex-start; /* Don't stretch if content is short */
+        }
+
+
+        .control-group { margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .control-group label { min-width: 100px; }
+        #search-input { width: 300px; padding: 8px; font-size: 1em; }
+        #foot-syllable-input { width: 100px; padding: 8px; font-size: 1em; }
+        #search-button { padding: 8px 15px; font-size: 1em; cursor: pointer; }
+        
+        #results-area { margin-top: 20px; }
+        .result-item { 
+            margin-bottom: 20px; 
+            padding-bottom: 15px; 
+            border-bottom: 1px dashed #ccc; 
+        }
+        .result-item:last-child { border-bottom: none; }
+        
+        .result-passage-ref {
+            color: silver;
+            font-weight: bold;
+            margin-right: 8px;
+            font-size: 0.9em;
+            display: inline-block;
+        }
+        .result-syllables pre {
+            background-color: #f9f9f9; padding: 10px; border-radius: 4px; 
+            white-space: pre-wrap; word-wrap: break-word; line-height: 1.8; 
+            display: inline-block; width: calc(100% - 70px); 
+            vertical-align: top; margin-top: 0; 
+            font-family: monospace; 
+        }
+
+        #pagination-controls { margin-top: 20px; text-align: center; }
+        #pagination-controls button { padding: 5px 10px; margin: 0 5px; cursor: pointer; }
+        #page-info { margin: 0 10px; display: inline-block; }
+
+        .status, .info { margin-bottom: 10px; min-height: 1.2em; }
+        .error { color: red; font-weight: bold; }
+        .status-loading { color: blue; }
+        .status-results { color: green; }
+
+        .syllable-display-span { 
+            display: inline-block; padding: 2px 4px; margin: 1px 0;         
+            border-radius: 3px; line-height: 1.4; vertical-align: middle;
+        }
+        .clickable-syllable-search { /* Class for clickable syllables in search results */
+             cursor: pointer;
+        }
+        .clickable-syllable-search:hover {
+            outline: 1px solid #007bff; /* Similar to first app's syllable hover */
+            box-shadow: 0 0 3px rgba(0,123,255,0.5);
+        }
+
+        .syllable-long { background-color: #cccccc; color: #000; }
+        .syllable-short { background-color: #eeeeee; color: #333; }
+        .syllable-anceps { background-color: #ffcc80; color: #573a08; }
+        .syllable-unknown { background-color: #f0f0f0; border: 1px dashed #ccc; }
+        .half-line-marker { 
+            font-size: 1.3em; font-weight: bold; color: #555; 
+            padding: 0 5px; vertical-align: middle; 
+        }
+        .search-match-highlight { 
+            background-color: yellow !important; 
+            color: black !important; 
+        }
+    </style>
+</head>
+<body>
+    <h1>Iliad Text Search</h1>
+
+    <div class="main-container">
+        <div class="search-content-area">
+            <div class="control-group">
+                <label for="search-input">Search Text:</label>
+                <input type="text" id="search-input" placeholder="Enter Greek text (simplified)...">
+            </div>
+            <div class="control-group">
+                <label for="foot-syllable-input">At Foot.Syllable:</label>
+                <input type="text" id="foot-syllable-input" placeholder="e.g., 1.1">
+            </div>
+            <div class="control-group">
+                <button id="search-button">Search</button>
+            </div>
+            <div id="status-message" class="status"></div>
+            <div id="results-area"></div>
+            <div id="pagination-controls" style="display: none;">
+                <button id="prev-page-button" disabled>&laquo; Previous</button>
+                <span id="page-info"></span>
+                <button id="next-page-button" disabled>Next &raquo;</button>
+            </div>
+        </div>
+        <div class="info-panel-area" id="info-display-search">
+            <!-- Click details will appear here -->
+        </div>
+    </div>
+
+
+    <script>
+        const DATA_URL = 'https://raw.githubusercontent.com/neelsmith/homericlanguage/refs/heads/main/scansion-expanded.cex';
+        const RESULTS_PER_PAGE = 10;
+        let rawDataLines = [], parsedData = [], linesData = {};
+        let currentSearchResults = [], currentPage = 1;
+
+        const searchInput = document.getElementById('search-input');
+        const footSyllableInput = document.getElementById('foot-syllable-input');
+        const searchButton = document.getElementById('search-button');
+        const statusMessageDiv = document.getElementById('status-message');
+        const resultsAreaDiv = document.getElementById('results-area');
+        const paginationControlsDiv = document.getElementById('pagination-controls');
+        const prevPageButton = document.getElementById('prev-page-button');
+        const nextPageButton = document.getElementById('next-page-button');
+        const pageInfoSpan = document.getElementById('page-info');
+        const infoDisplaySearch = document.getElementById('info-display-search'); // For this app's info
+
+        const PLACEHOLDER_INFO_TEXT_SEARCH = 'Click on a syllable in the results for details.';
+
+
+        function simplifyGreek(text) {
+            return text ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[,’'.·]/g, "") : "";
+        }
+
+        async function fetchDataAndPreprocess() {
+            statusMessageDiv.textContent = 'Loading and preparing data... Please wait.';
+            statusMessageDiv.className = 'status status-loading';
+            infoDisplaySearch.textContent = "Loading data..."; // Initial info message
+            searchButton.disabled = true; searchInput.disabled = true; footSyllableInput.disabled = true;
+            try {
+                const response = await fetch(DATA_URL);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const textData = await response.text();
+                const allFileLines = textData.trim().split('\n');
+                rawDataLines = allFileLines.slice(1).filter(line => line.trim() !== '');
+                const columnNames = ['Passage', 'Syllable', 'SyllableText', 'MetricLength', 'Token', 'Half-line'];
+                parsedData = rawDataLines.map(line => {
+                    const values = line.split('|');
+                    const record = {};
+                    columnNames.forEach((colName, index) => {
+                        record[colName] = (colName === 'Half-line') ? parseInt(values[index], 10) : values[index];
+                    });
+                    return record;
+                });
+                const tempLines = {};
+                parsedData.forEach(record => {
+                    if (!tempLines[record.Passage]) tempLines[record.Passage] = { records: [] };
+                    tempLines[record.Passage].records.push(record);
+                });
+                for (const passageUrn in tempLines) {
+                    linesData[passageUrn] = { records: tempLines[passageUrn].records };
+                }
+                statusMessageDiv.textContent = `Data ready. ${Object.keys(linesData).length} lines processed.`;
+                statusMessageDiv.className = 'status status-results';
+                infoDisplaySearch.textContent = PLACEHOLDER_INFO_TEXT_SEARCH;
+                searchButton.disabled = false; searchInput.disabled = false; footSyllableInput.disabled = false;
+            } catch (error) {
+                console.error('Error fetching or preprocessing data:', error);
+                statusMessageDiv.innerHTML = `<span class="error">Error loading data: ${error.message}.</span>`;
+                infoDisplaySearch.textContent = 'Could not load data.';
+            }
+        }
+        
+        function getPassageComponentFromUrn(urnString) { // Helper from App1
+            if (!urnString) return '';
+            const parts = urnString.split(':');
+            return parts.length > 0 ? parts[parts.length - 1] : '';
+        }
+
+        function getFootSyllableFromSyllablePassage(syllablePassageComponent) {
+            if (!syllablePassageComponent) return null;
+            const parts = syllablePassageComponent.split('.');
+            return (parts.length >= 4) ? { foot: parts[2], syllable: parts[3] } : null;
+        }
+
+        function formatSyllablesForDisplay(lineRecords, highlightStartIndex = -1, highlightEndIndex = -1) { 
+            let syllablesHtmlOutput = "", previousToken = null, halfLineMarkerAdded = false; 
+            lineRecords.forEach((record, index) => {
+                let prefix = ""; 
+                if (record['Half-line'] === 2 && !halfLineMarkerAdded) {
+                    prefix += `<span class="half-line-marker">∥</span> `; halfLineMarkerAdded = true;
+                }
+                if (index === 0) syllablesHtmlOutput += prefix; 
+                else {
+                    syllablesHtmlOutput += (record.Token !== previousToken) ? " " : "-";
+                    syllablesHtmlOutput += prefix; 
+                }
+                let syllableClass = 'syllable-unknown'; 
+                switch (record.MetricLength.toLowerCase()) { 
+                    case 'long': syllableClass = 'syllable-long'; break;
+                    case 'short': syllableClass = 'syllable-short'; break;
+                    case 'anceps': syllableClass = 'syllable-anceps'; break;
+                }
+                if (index >= highlightStartIndex && index <= highlightEndIndex) {
+                    syllableClass += ' search-match-highlight';
+                }
+                const safeSyllableText = record.SyllableText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                // Add class and data attributes for clickability
+                syllablesHtmlOutput += `<span class="syllable-display-span clickable-syllable-search ${syllableClass}" data-syllable-urn="${record.Syllable}" data-metric-length="${record.MetricLength}">${safeSyllableText}</span>`;
+                previousToken = record.Token;
+            });
+            return syllablesHtmlOutput; 
+        }
+        
+        function performSearch() {
+            // ... (performSearch logic remains the same as the previous correct version)
+            const query = searchInput.value.trim();
+            const constraint = footSyllableInput.value.trim();
+            if (!query) {
+                statusMessageDiv.textContent = 'Please enter a search term.'; statusMessageDiv.className = 'status info';
+                resultsAreaDiv.innerHTML = ''; paginationControlsDiv.style.display = 'none'; currentSearchResults = []; return;
+            }
+            let targetFoot = null, targetSyllableInFoot = null;
+            if (constraint) {
+                const parts = constraint.split('.');
+                if (parts.length === 2 && /^\d+$/.test(parts[0]) && /^\d+$/.test(parts[1])) {
+                    targetFoot = parts[0]; targetSyllableInFoot = parts[1];
+                } else {
+                    statusMessageDiv.textContent = 'Invalid Foot.Syllable (e.g., 1.1).'; statusMessageDiv.className = 'status error';
+                    resultsAreaDiv.innerHTML = ''; paginationControlsDiv.style.display = 'none'; currentSearchResults = []; return;
+                }
+            }
+            statusMessageDiv.textContent = 'Searching...'; statusMessageDiv.className = 'status status-loading';
+            const simplifiedQuery = simplifyGreek(query);
+            currentSearchResults = [];
+
+            for (const passageUrn in linesData) {
+                const lineEntry = linesData[passageUrn];
+                const lineRecords = lineEntry.records;
+                let matchFoundInLine = false;
+                let firstSyllableOfMatchIndex = -1;
+                let lastSyllableOfMatchIndex = -1;
+                let searchStartRecordIndex = 0; 
+                if (targetFoot && targetSyllableInFoot) { 
+                    let foundConstraintStart = false;
+                    for (let i = 0; i < lineRecords.length; i++) {
+                        const recSyllPassComp = lineRecords[i].Syllable.split(':').pop();
+                        const fs = getFootSyllableFromSyllablePassage(recSyllPassComp);
+                        if (fs && fs.foot === targetFoot && fs.syllable === targetSyllableInFoot) {
+                            searchStartRecordIndex = i;
+                            foundConstraintStart = true;
+                            break;
+                        }
+                    }
+                    if (!foundConstraintStart) continue; 
+                }
+                for (let i = searchStartRecordIndex; i < lineRecords.length; i++) {
+                    if (targetFoot && i > searchStartRecordIndex) break; 
+                    let textBuiltFromStart = "";
+                    let prevToken = (i > 0 && i === searchStartRecordIndex) ? lineRecords[i-1].Token : null; 
+                    
+                    for (let j = i; j < lineRecords.length; j++) {
+                        const currentRecord = lineRecords[j];
+                        if (j > i && currentRecord.Token !== prevToken) {
+                            textBuiltFromStart += " ";
+                        }
+                        textBuiltFromStart += simplifyGreek(currentRecord.SyllableText);
+                        prevToken = currentRecord.Token;
+
+                        if (textBuiltFromStart === simplifiedQuery) {
+                            firstSyllableOfMatchIndex = i;
+                            lastSyllableOfMatchIndex = j;
+                            matchFoundInLine = true;
+                            break; 
+                        }
+                        if (textBuiltFromStart.length >= simplifiedQuery.length && !textBuiltFromStart.startsWith(simplifiedQuery)) {
+                            break;
+                        }
+                    }
+                    if (matchFoundInLine) break; 
+                }
+                if (matchFoundInLine) {
+                    currentSearchResults.push({ 
+                        passageUrn: passageUrn, 
+                        matchStartIndex: firstSyllableOfMatchIndex, 
+                        matchEndIndex: lastSyllableOfMatchIndex
+                    });
+                }
+            } 
+            currentPage = 1; renderResultsPage(); updatePaginationControls();
+            statusMessageDiv.textContent = `${currentSearchResults.length} result(s) found.`;
+            statusMessageDiv.className = (currentSearchResults.length > 0) ? 'status status-results' : 'status info';
+            infoDisplaySearch.textContent = PLACEHOLDER_INFO_TEXT_SEARCH; // Reset info on new search
+        }
+
+
+        function renderResultsPage() {
+            resultsAreaDiv.innerHTML = '';
+            if (currentSearchResults.length === 0) {
+                paginationControlsDiv.style.display = 'none'; return;
+            }
+            const startIndex = (currentPage - 1) * RESULTS_PER_PAGE;
+            const endIndex = startIndex + RESULTS_PER_PAGE;
+            const pageResults = currentSearchResults.slice(startIndex, endIndex);
+
+            pageResults.forEach(result => {
+                const passageUrn = result.passageUrn;
+                const lineData = linesData[passageUrn];
+                if (!lineData) return;
+                const resultItemDiv = document.createElement('div');
+                resultItemDiv.className = 'result-item';
+                const passageRef = passageUrn.split(':').pop();
+                const syllablesHtml = formatSyllablesForDisplay(lineData.records, result.matchStartIndex, result.matchEndIndex);
+                resultItemDiv.innerHTML = `<div><span class="result-passage-ref">${passageRef}</span><div class="result-syllables"><pre>${syllablesHtml}</pre></div></div>`;
+                resultsAreaDiv.appendChild(resultItemDiv);
+            });
+        }
+        function updatePaginationControls() {
+            if (currentSearchResults.length === 0) { paginationControlsDiv.style.display = 'none'; return; }
+            const totalPages = Math.ceil(currentSearchResults.length / RESULTS_PER_PAGE);
+            pageInfoSpan.textContent = `Page ${currentPage} of ${totalPages}`;
+            prevPageButton.disabled = currentPage === 1;
+            nextPageButton.disabled = currentPage === totalPages || totalPages === 0;
+            paginationControlsDiv.style.display = totalPages > 0 ? 'block' : 'none';
+        }
+
+        // --- Event Listeners ---
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') performSearch(); });
+        footSyllableInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') performSearch(); });
+        prevPageButton.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderResultsPage(); updatePaginationControls(); } });
+        nextPageButton.addEventListener('click', () => { const totalPages = Math.ceil(currentSearchResults.length / RESULTS_PER_PAGE); if (currentPage < totalPages) { currentPage++; renderResultsPage(); updatePaginationControls(); } });
+        
+        // Click listener for syllables in search results
+        resultsAreaDiv.addEventListener('click', function(event) {
+            const syllableSpan = event.target.closest('.clickable-syllable-search');
+            if (syllableSpan) {
+                const syllableUrn = syllableSpan.dataset.syllableUrn;
+                const metricLength = syllableSpan.dataset.metricLength;
+                const syllableText = syllableSpan.textContent;
+
+                if (syllableUrn) {
+                    const passageComponent = getPassageComponentFromUrn(syllableUrn); // e.g., 1.1.2.1
+                    const fs = getFootSyllableFromSyllablePassage(passageComponent);
+                    let infoText = `Syllable: ${syllableText}`;
+                    if (fs) {
+                        infoText += ` | Foot-syllable: ${fs.foot}.${fs.syllable}`;
+                    }
+                    if (metricLength) {
+                         infoText += ` | Length: ${metricLength.charAt(0).toUpperCase() + metricLength.slice(1)}`;
+                    }
+                    infoDisplaySearch.textContent = infoText;
+                } else {
+                    infoDisplaySearch.textContent = 'Clicked syllable has no URN data.';
+                }
+            }
+        });
+        
+        document.addEventListener('DOMContentLoaded', fetchDataAndPreprocess);
+    </script>
+</body>
+</html>
+
+    <div class="main-container">
+        <div class="search-content-area">
+            <!-- ... search controls, status, results, pagination ... -->
+        </div>
+        <div class="info-panel-area" id="info-display-search">
+            <!-- Click details will appear here -->
+        </div>
+    </div>
+    
+
+
+							<script>
+                            	    // Add class and data attributes for clickability
+    syllablesHtmlOutput += `<span class="syllable-display-span clickable-syllable-search ${syllableClass}" data-syllable-urn="${record.Syllable}" data-metric-length="${record.MetricLength}">${safeSyllableText}</span>`;
+    
+
+        const DATA_URL = 'https://raw.githubusercontent.com/neelsmith/homericlanguage/refs/heads/main/scansion-expanded.cex';
+        const RESULTS_PER_PAGE = 10;
+        let rawDataLines = [], parsedData = [], linesData = {};
+        let currentSearchResults = [], currentPage = 1;
+
+        const searchInput = document.getElementById('search-input');
+        const footSyllableInput = document.getElementById('foot-syllable-input');
+        const searchButton = document.getElementById('search-button');
+        const statusMessageDiv = document.getElementById('status-message');
+        const resultsAreaDiv = document.getElementById('results-area');
+        const paginationControlsDiv = document.getElementById('pagination-controls');
+        const prevPageButton = document.getElementById('prev-page-button');
+        const nextPageButton = document.getElementById('next-page-button');
+        const pageInfoSpan = document.getElementById('page-info');
+        const infoDisplaySearch = document.getElementById('info-display-search'); // For this app's info
+
+        const PLACEHOLDER_INFO_TEXT_SEARCH = 'Click on a syllable in the results for details.';
+
+
+        function simplifyGreek(text) {
+            return text ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[,’'.·]/g, "") : "";
+        }
+
+        async function fetchDataAndPreprocess() {
+            statusMessageDiv.textContent = 'Loading and preparing data... Please wait.';
+            statusMessageDiv.className = 'status status-loading';
+            infoDisplaySearch.textContent = "Loading data..."; // Initial info message
+            searchButton.disabled = true; searchInput.disabled = true; footSyllableInput.disabled = true;
+            try {
+                const response = await fetch(DATA_URL);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const textData = await response.text();
+                const allFileLines = textData.trim().split('\n');
+                rawDataLines = allFileLines.slice(1).filter(line => line.trim() !== '');
+                const columnNames = ['Passage', 'Syllable', 'SyllableText', 'MetricLength', 'Token', 'Half-line'];
+                parsedData = rawDataLines.map(line => {
+                    const values = line.split('|');
+                    const record = {};
+                    columnNames.forEach((colName, index) => {
+                        record[colName] = (colName === 'Half-line') ? parseInt(values[index], 10) : values[index];
+                    });
+                    return record;
+                });
+                const tempLines = {};
+                parsedData.forEach(record => {
+                    if (!tempLines[record.Passage]) tempLines[record.Passage] = { records: [] };
+                    tempLines[record.Passage].records.push(record);
+                });
+                for (const passageUrn in tempLines) {
+                    linesData[passageUrn] = { records: tempLines[passageUrn].records };
+                }
+                statusMessageDiv.textContent = `Data ready. ${Object.keys(linesData).length} lines processed.`;
+                statusMessageDiv.className = 'status status-results';
+                infoDisplaySearch.textContent = PLACEHOLDER_INFO_TEXT_SEARCH;
+                searchButton.disabled = false; searchInput.disabled = false; footSyllableInput.disabled = false;
+            } catch (error) {
+                console.error('Error fetching or preprocessing data:', error);
+                statusMessageDiv.innerHTML = `<span class="error">Error loading data: ${error.message}.</span>`;
+                infoDisplaySearch.textContent = 'Could not load data.';
+            }
+        }
+        
+        function getPassageComponentFromUrn(urnString) { // Helper from App1
+            if (!urnString) return '';
+            const parts = urnString.split(':');
+            return parts.length > 0 ? parts[parts.length - 1] : '';
+        }
+
+        function getFootSyllableFromSyllablePassage(syllablePassageComponent) {
+            if (!syllablePassageComponent) return null;
+            const parts = syllablePassageComponent.split('.');
+            return (parts.length >= 4) ? { foot: parts[2], syllable: parts[3] } : null;
+        }
+
+        function formatSyllablesForDisplay(lineRecords, highlightStartIndex = -1, highlightEndIndex = -1) { 
+            let syllablesHtmlOutput = "", previousToken = null, halfLineMarkerAdded = false; 
+            lineRecords.forEach((record, index) => {
+                let prefix = ""; 
+                if (record['Half-line'] === 2 && !halfLineMarkerAdded) {
+                    prefix += `<span class="half-line-marker">∥</span> `; halfLineMarkerAdded = true;
+                }
+                if (index === 0) syllablesHtmlOutput += prefix; 
+                else {
+                    syllablesHtmlOutput += (record.Token !== previousToken) ? " " : "-";
+                    syllablesHtmlOutput += prefix; 
+                }
+                let syllableClass = 'syllable-unknown'; 
+                switch (record.MetricLength.toLowerCase()) { 
+                    case 'long': syllableClass = 'syllable-long'; break;
+                    case 'short': syllableClass = 'syllable-short'; break;
+                    case 'anceps': syllableClass = 'syllable-anceps'; break;
+                }
+                if (index >= highlightStartIndex && index <= highlightEndIndex) {
+                    syllableClass += ' search-match-highlight';
+                }
+                const safeSyllableText = record.SyllableText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                // Add class and data attributes for clickability
+                syllablesHtmlOutput += `<span class="syllable-display-span clickable-syllable-search ${syllableClass}" data-syllable-urn="${record.Syllable}" data-metric-length="${record.MetricLength}">${safeSyllableText}</span>`;
+                previousToken = record.Token;
+            });
+            return syllablesHtmlOutput; 
+        }
+        
+        function performSearch() {
+            // ... (performSearch logic remains the same as the previous correct version)
+            const query = searchInput.value.trim();
+            const constraint = footSyllableInput.value.trim();
+            if (!query) {
+                statusMessageDiv.textContent = 'Please enter a search term.'; statusMessageDiv.className = 'status info';
+                resultsAreaDiv.innerHTML = ''; paginationControlsDiv.style.display = 'none'; currentSearchResults = []; return;
+            }
+            let targetFoot = null, targetSyllableInFoot = null;
+            if (constraint) {
+                const parts = constraint.split('.');
+                if (parts.length === 2 && /^\d+$/.test(parts[0]) && /^\d+$/.test(parts[1])) {
+                    targetFoot = parts[0]; targetSyllableInFoot = parts[1];
+                } else {
+                    statusMessageDiv.textContent = 'Invalid Foot.Syllable (e.g., 1.1).'; statusMessageDiv.className = 'status error';
+                    resultsAreaDiv.innerHTML = ''; paginationControlsDiv.style.display = 'none'; currentSearchResults = []; return;
+                }
+            }
+            statusMessageDiv.textContent = 'Searching...'; statusMessageDiv.className = 'status status-loading';
+            const simplifiedQuery = simplifyGreek(query);
+            currentSearchResults = [];
+
+            for (const passageUrn in linesData) {
+                const lineEntry = linesData[passageUrn];
+                const lineRecords = lineEntry.records;
+                let matchFoundInLine = false;
+                let firstSyllableOfMatchIndex = -1;
+                let lastSyllableOfMatchIndex = -1;
+                let searchStartRecordIndex = 0; 
+                if (targetFoot && targetSyllableInFoot) { 
+                    let foundConstraintStart = false;
+                    for (let i = 0; i < lineRecords.length; i++) {
+                        const recSyllPassComp = lineRecords[i].Syllable.split(':').pop();
+                        const fs = getFootSyllableFromSyllablePassage(recSyllPassComp);
+                        if (fs && fs.foot === targetFoot && fs.syllable === targetSyllableInFoot) {
+                            searchStartRecordIndex = i;
+                            foundConstraintStart = true;
+                            break;
+                        }
+                    }
+                    if (!foundConstraintStart) continue; 
+                }
+                for (let i = searchStartRecordIndex; i < lineRecords.length; i++) {
+                    if (targetFoot && i > searchStartRecordIndex) break; 
+                    let textBuiltFromStart = "";
+                    let prevToken = (i > 0 && i === searchStartRecordIndex) ? lineRecords[i-1].Token : null; 
+                    
+                    for (let j = i; j < lineRecords.length; j++) {
+                        const currentRecord = lineRecords[j];
+                        if (j > i && currentRecord.Token !== prevToken) {
+                            textBuiltFromStart += " ";
+                        }
+                        textBuiltFromStart += simplifyGreek(currentRecord.SyllableText);
+                        prevToken = currentRecord.Token;
+
+                        if (textBuiltFromStart === simplifiedQuery) {
+                            firstSyllableOfMatchIndex = i;
+                            lastSyllableOfMatchIndex = j;
+                            matchFoundInLine = true;
+                            break; 
+                        }
+                        if (textBuiltFromStart.length >= simplifiedQuery.length && !textBuiltFromStart.startsWith(simplifiedQuery)) {
+                            break;
+                        }
+                    }
+                    if (matchFoundInLine) break; 
+                }
+                if (matchFoundInLine) {
+                    currentSearchResults.push({ 
+                        passageUrn: passageUrn, 
+                        matchStartIndex: firstSyllableOfMatchIndex, 
+                        matchEndIndex: lastSyllableOfMatchIndex
+                    });
+                }
+            } 
+            currentPage = 1; renderResultsPage(); updatePaginationControls();
+            statusMessageDiv.textContent = `${currentSearchResults.length} result(s) found.`;
+            statusMessageDiv.className = (currentSearchResults.length > 0) ? 'status status-results' : 'status info';
+            infoDisplaySearch.textContent = PLACEHOLDER_INFO_TEXT_SEARCH; // Reset info on new search
+        }
+
+
+        function renderResultsPage() {
+            resultsAreaDiv.innerHTML = '';
+            if (currentSearchResults.length === 0) {
+                paginationControlsDiv.style.display = 'none'; return;
+            }
+            const startIndex = (currentPage - 1) * RESULTS_PER_PAGE;
+            const endIndex = startIndex + RESULTS_PER_PAGE;
+            const pageResults = currentSearchResults.slice(startIndex, endIndex);
+
+            pageResults.forEach(result => {
+                const passageUrn = result.passageUrn;
+                const lineData = linesData[passageUrn];
+                if (!lineData) return;
+                const resultItemDiv = document.createElement('div');
+                resultItemDiv.className = 'result-item';
+                const passageRef = passageUrn.split(':').pop();
+                const syllablesHtml = formatSyllablesForDisplay(lineData.records, result.matchStartIndex, result.matchEndIndex);
+                resultItemDiv.innerHTML = `<div><span class="result-passage-ref">${passageRef}</span><div class="result-syllables"><pre>${syllablesHtml}</pre></div></div>`;
+                resultsAreaDiv.appendChild(resultItemDiv);
+            });
+        }
+        function updatePaginationControls() {
+            if (currentSearchResults.length === 0) { paginationControlsDiv.style.display = 'none'; return; }
+            const totalPages = Math.ceil(currentSearchResults.length / RESULTS_PER_PAGE);
+            pageInfoSpan.textContent = `Page ${currentPage} of ${totalPages}`;
+            prevPageButton.disabled = currentPage === 1;
+            nextPageButton.disabled = currentPage === totalPages || totalPages === 0;
+            paginationControlsDiv.style.display = totalPages > 0 ? 'block' : 'none';
+        }
+
+        // --- Event Listeners ---
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') performSearch(); });
+        footSyllableInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') performSearch(); });
+        prevPageButton.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderResultsPage(); updatePaginationControls(); } });
+        nextPageButton.addEventListener('click', () => { const totalPages = Math.ceil(currentSearchResults.length / RESULTS_PER_PAGE); if (currentPage < totalPages) { currentPage++; renderResultsPage(); updatePaginationControls(); } });
+        
+        // Click listener for syllables in search results
+        resultsAreaDiv.addEventListener('click', function(event) {
+            const syllableSpan = event.target.closest('.clickable-syllable-search');
+            if (syllableSpan) {
+                const syllableUrn = syllableSpan.dataset.syllableUrn;
+                const metricLength = syllableSpan.dataset.metricLength;
+                const syllableText = syllableSpan.textContent;
+
+                if (syllableUrn) {
+                    const passageComponent = getPassageComponentFromUrn(syllableUrn); // e.g., 1.1.2.1
+                    const fs = getFootSyllableFromSyllablePassage(passageComponent);
+                    let infoText = `Syllable: ${syllableText}`;
+                    if (fs) {
+                        infoText += ` | Foot-syllable: ${fs.foot}.${fs.syllable}`;
+                    }
+                    if (metricLength) {
+                         infoText += ` | Length: ${metricLength.charAt(0).toUpperCase() + metricLength.slice(1)}`;
+                    }
+                    infoDisplaySearch.textContent = infoText;
+                } else {
+                    infoDisplaySearch.textContent = 'Clicked syllable has no URN data.';
+                }
+            }
+        });
+        
+        document.addEventListener('DOMContentLoaded', fetchDataAndPreprocess);
+    
+
+							</script>
+                        </body>
+                        </html>
+                    
