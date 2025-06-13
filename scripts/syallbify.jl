@@ -21,7 +21,7 @@ for hmtiliad in hmtiliads
     books = map(p -> passageparts(p.urn)[1], hmtiliad) |> unique
     booklist = join(books, ", ")
     @info("$(iliadversion): $(length(books)) books")
-    @info("$(iliadversion): $(booklist)")
+    #@info("$(iliadversion): $(booklist)")
 end
 
 
