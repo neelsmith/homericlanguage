@@ -7,6 +7,9 @@
 ## Vibe-coded apps
 
 - `apps/metricreader.html`: read an *Iliad* text with full metrical analysis
+- `apps/metricsearch.html`: search  an *Iliad* text with optional metrical constraints
+
+
 
 ## Source for scansion
 
