@@ -11,7 +11,10 @@ For each of the *Iliad*s in the Homer Multitext project archive, we create:
 - a corpus of citable tokens
 - a corpus of citable syllables, defined phonetically
 
-We map the corpus of phonetic syllables to a corpus of metrical syllables, and coordinate those with metrical scansion provided by `hypotactic.com` (see below).
+
+This is done with the `scripts/syllabify.jl` script.
+
+We next need to map the corpus of phonetic syllables to a corpus of metrical syllables, and coordinate those with metrical scansion provided by `hypotactic.com` (see below).
 
 ## Vibe-coded apps
 
