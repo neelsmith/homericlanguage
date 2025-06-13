@@ -48,6 +48,7 @@ The data can actually include as many as 10 comma-delimited columns, however. He
 
 ### Formatting and sanitizing scansion data
 
+
 1. Tested CSV structure of raw files in `source-IliadAllCSV/raw`. Worked on a copy in `source-IliadAllCSV/cleaner`to correct lines with invalid delimited-text format.
-2. Ran the script `scripts/cexify.jl` to reformat 24 sources files in `source-IliadAllCSV/cleaner` to a single file using CTS URNs to identify passages; wrote output to `scansion.cex`  
-3. Ran the script `scripts/expandreff.jl` to expand data references in `scansion.cex` and wrote results to `scansion-expanded.cex`
+2. Ran the script `scripts/cexify.jl` to keep the first 6 columns of the 24 source files in `source-IliadAllCSV/cleaner`, combine them into a single delimited-text file, and passage identifiers as CTS URNs. The output of this step is saved to `scansion.cex`.
+3. Ran the script `scripts/expandreff.jl` to expand identifiers for lexical tokens and metrical syllables in `scansion.cex`. The output of this step is saved to `scansion-expanded.cex`.
