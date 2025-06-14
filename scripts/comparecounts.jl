@@ -116,3 +116,38 @@ end
 
 
 x = guessmapping_gt(gt[2], msA, hypotactic)
+
+
+function guessmapping_lt(ref, msA, hypotactic)
+  @info(ref)
+    msAdata = filter(msA) do ln
+        cols = split(ln, "|")
+        ref == (collapsePassageTo(CtsUrn(cols[1]), 2) |> passagecomponent)
+    end
+    @info("$(length(msAdata)) syllables in msA")
+    hypodata = filter(hypotactic) do ln
+        cols = split(ln, "|")
+        ref == CtsUrn(cols[1]) |> passagecomponent
+    end
+    @info("$(length(hypodata)) syllables in hypotactic")    
+
+
+    count = 1
+    longcount = 1
+    pairingok = true
+    circuitbreaker = 23 # all dactyls = 17 phonetic syllables;  will never approach all dactyls with 6 instances of synizesis from 23 syllables
+    while pairingok && count < circuitbreaker     
+        msAtext = Unicode.normalize(split(msAdata[longcount], "|")[2]; stripmark = true) |> lowercase
+        hypotextraw = Unicode.normalize(split(hypodata[count], "|")[3]; stripmark = true) |> lowercase
+        hypotext = replace(hypotextraw, "’" => "'")
+        @info("Compare $(msAtext) with $(hypotext) at count $(count)")
+
+
+
+        count = count + 1
+        longcount = longcount + 1
+    end
+end
+
+
+guessmapping_lt(lt[3], msA, hypotactic)
