@@ -6,7 +6,7 @@ using Unicode
 datadir = joinpath(root, "data")
 phoneticsylls = joinpath(datadir, "syllables-phonetic")
 msAfile = joinpath(phoneticsylls, "msAsyllables-phonetic.cex")
-hypotacticfile = joinpath(root, "scansion-expanded.cex")
+hypotacticfile = joinpath(root, "scansion-regularized.cex")
 
 
 msA = readlines(msAfile)[2:end]
@@ -74,7 +74,7 @@ function guessmapping_gt(ref, msA, hypotactic)
     count = 1
     shortcount = 1
     pairingok = true
-    circuitbreaker = 18
+    circuitbreaker = 23 # all dactyls = 17 phonetic syllables;  will never approach all dactyls with 6 instances of synizesis from 23 syllables
     while pairingok && count < circuitbreaker
     # while count < circuitbreaker
         
