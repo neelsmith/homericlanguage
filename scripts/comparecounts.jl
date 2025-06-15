@@ -1,8 +1,10 @@
 root = pwd()
 
-using StatsBase, OrderedCollections
+using HmtArchive
 using CitableText
 using Unicode
+using StringDistances
+
 datadir = joinpath(root, "data")
 phoneticsylls = joinpath(datadir, "syllables-phonetic")
 msAfile = joinpath(phoneticsylls, "msAsyllables-phonetic.cex")
@@ -150,4 +152,8 @@ function guessmapping_lt(ref, msA, hypotactic)
 end
 
 
-guessmapping_lt(lt[3], msA, hypotactic)
+#guessmapping_lt(lt[3], msA, hypotactic)
+
+
+
+
