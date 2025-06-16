@@ -1,6 +1,6 @@
 using HmtArchive, HmtArchive.Analysis
 using PolytonicGreek, Orthography
-using CitableText, CitableCorpus
+using CitableText, CitableCorpus,CitableBase
 
 
 src = hmt_cex()
